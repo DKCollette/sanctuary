@@ -1,0 +1,424 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Conversation {
+  id                String   @id @default(cuid())
+  title             String   @default("New Conversation")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  selectedMode      String   @default("balanced")
+  anonymousSessionId String?
+  optionalUserId    String?
+  userId            String?
+
+  messages Message[]
+  user     User?   @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id              String   @id @default(cuid())
+  displayName     String   @unique
+  passcodeHash    String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastLoginAt     DateTime @default(now())
+
+  // Consciousness tracking
+  currentStage    String   @default("Seeking")  // Seeking, Grounding, Awakening, Integrating, Aligning
+  lastStageUpdate DateTime @default(now())
+
+  // Relations
+  preferences         UserPreferences?
+  conversations       Conversation[]
+  consciousnessRecords ConsciousnessRecord[]
+  sessionLogs         SessionLog[]
+  bookmarkedCategories UserBookmark[]
+  tokens              UserToken[]
+  stateSnapshots      StateSnapshot[]
+
+  // Forum relations
+  forumPosts              ForumPost[]
+  forumReplies            ForumReply[]
+  forumReactions          ForumReaction[]
+  forumBookmarks          ForumBookmark[]
+  forumFollows            ForumPostFollower[]
+  forumReports            ForumReport[]
+  reflectionResponses     ReflectionResponse[]
+  studyGroupsCreated      StudyGroup[]
+  studyGroupMemberships   StudyGroupMember[]
+  communityRecognitions   CommunityRecognition[]
+  recognitionsAwarded     CommunityRecognition[] @relation("RecognitionAwarder")
+  currentlyExploring      CurrentlyExploring[]
+}
+
+model UserPreferences {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  primaryModalities   String   @default("[]")  // JSON array
+  intentions          String   @default("[]")  // JSON array
+  bookmarkedCategories String  @default("[]")  // JSON array
+  contentDepth        String   @default("Intermediate")  // Beginner, Intermediate, Advanced
+  enableTracking      Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ConsciousnessRecord {
+  id              String   @id @default(cuid())
+  userId          String
+  stage           String   // Seeking, Grounding, Awakening, Integrating, Aligning
+  energeticState  String   // Short description of current state
+  sessionSummary  String?  // Insight from the session that prompted this reading
+  milestone       String?  // breakthrough description if applicable
+  stateData       String?  // Full JSON state data (avatar + chakras) from the assessment
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SessionLog {
+  id           String   @id @default(cuid())
+  userId       String
+  summary      String   // Brief summary of the session
+  frequentTopics String @default("[]")  // JSON array of topics discussed
+  energeticNote String? // Observed energetic cues
+  messageCount Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserBookmark {
+  id       String @id @default(cuid())
+  userId   String
+  category String // Which category they've bookmarked (e.g., "Lunar Cycles")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+}
+
+model UserToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
+model Message {
+  id              String    @id @default(cuid())
+  conversationId  String
+  role            String    // "user" or "assistant"
+  content         String
+  createdAt       DateTime  @default(now())
+  model           String?
+  tokenUsage      Int?
+  responseLatency Int?
+  feedbackRating  Int?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  feedbacks    Feedback[]
+  stateSnapshots StateSnapshot[]
+}
+
+model Feedback {
+  id          String   @id @default(cuid())
+  messageId   String
+  rating      Int      // 1 for thumbs-up, -1 for thumbs-down
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model SiteError {
+  id        String   @id @default(cuid())
+  message   String
+  stack     String?
+  path      String?
+  method    String?
+  createdAt DateTime @default(now())
+}
+
+model NewsItem {
+  id              String   @id @default(cuid())
+  title           String
+  category        String
+  isActiveNow     Boolean  @default(false)
+  dateDisplay     String
+  summary         String
+  energeticImpact String
+  suggestedAction String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model StateSnapshot {
+  id                  String   @id @default(cuid())
+  userId              String
+  messageId           String?
+
+  // Avatar state
+  tier                String
+  consciousnessLevel  Int
+  xpGained            Int
+  currentElement      String
+  auraColor           String
+
+  // Chakra data stored as JSON string
+  chakraData          String   @default("[]")
+
+  // Reflection prompt from the response
+  reflectionPrompt    String?
+
+  createdAt           DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message Message? @relation(fields: [messageId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+// ─── Forum Models ───
+
+model ForumCategory {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String
+  icon        String   // Emoji icon for the category
+  color       String   // Theme color hint
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts ForumPost[]
+
+  @@index([sortOrder])
+}
+
+model ForumPost {
+  id             String   @id @default(cuid())
+  title          String
+  body           String   // Markdown content
+  slug           String   @unique
+  postType       String   @default("reflection") // question, reflection, experience, teaching, discussion, journal, resource
+  categoryId     String
+  authorId       String
+  isAnonymous    Boolean  @default(false)
+  isPinned       Boolean  @default(false)
+  isLocked       Boolean  @default(false)
+  viewCount      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Structured fields for Growth posts
+  realization    String?
+  whatChanged    String?
+  practicingNow  String?
+
+  // Tags stored as JSON array string
+  tags           String   @default("[]")
+
+  category ForumCategory @relation(fields: [categoryId], references: [id])
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  replies      ForumReply[]
+  reactions    ForumReaction[]
+  bookmarks    ForumBookmark[]
+  followers    ForumPostFollower[]
+  reports      ForumReport[]
+
+  @@index([categoryId, createdAt])
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([postType])
+}
+
+model ForumReply {
+  id        String   @id @default(cuid())
+  body      String
+  postId    String
+  authorId  String
+  parentId  String?  // For nested replies (null = top-level)
+  depth     Int      @default(0)
+  isEdited  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post     ForumPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author   User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent   ForumReply?  @relation("ReplyNesting", fields: [parentId], references: [id])
+  children ForumReply[] @relation("ReplyNesting")
+
+  reactions ForumReaction[]
+  reports   ForumReport[]
+
+  @@index([postId, createdAt])
+  @@index([authorId])
+  @@index([parentId])
+}
+
+model ForumReaction {
+  id        String   @id @default(cuid())
+  type      String   // resonates, insightful, growth, gratitude, reflecting
+  postId    String?
+  replyId   String?
+  userId    String
+  createdAt DateTime @default(now())
+
+  post  ForumPost?  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reply ForumReply? @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, postId])
+  @@unique([userId, type, replyId])
+  @@index([postId])
+  @@index([replyId])
+}
+
+model ForumBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model ForumPostFollower {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model ForumReport {
+  id          String   @id @default(cuid())
+  reason      String
+  description String?
+  postId      String?
+  replyId     String?
+  reporterId  String
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  post        ForumPost?  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reply       ForumReply? @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  reporter    User        @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([replyId])
+}
+
+// ─── Daily Reflection ───
+
+model DailyReflection {
+  id        String   @id @default(cuid())
+  prompt    String
+  date      DateTime @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  responses ReflectionResponse[]
+}
+
+model ReflectionResponse {
+  id        String   @id @default(cuid())
+  reflectionId String
+  userId    String?
+  content   String
+  isPrivate Boolean  @default(true) // private journal by default
+  createdAt DateTime @default(now())
+
+  reflection DailyReflection @relation(fields: [reflectionId], references: [id], onDelete: Cascade)
+  user       User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([reflectionId])
+}
+
+// ─── Study Groups ───
+
+model StudyGroup {
+  id            String   @id @default(cuid())
+  name          String
+  description   String
+  focus         String   // book, teaching, philosopher, tradition, etc.
+  focusItem     String   // The specific book/teaching name
+  createdById   String
+  isPublic      Boolean  @default(true)
+  maxMembers    Int      @default(50)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  creator User                @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  members StudyGroupMember[]
+
+  @@index([focus])
+}
+
+model StudyGroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  role      String   @default("member") // member, moderator, creator
+  joinedAt  DateTime @default(now())
+
+  group StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+}
+
+// ─── Community Recognition ───
+
+model CommunityRecognition {
+  id          String   @id @default(cuid())
+  userId      String
+  badge       String   // helpful_contributor, thoughtful_listener, community_guide, frequent_reflector
+  awardedById String?
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  awardedBy  User? @relation("RecognitionAwarder", fields: [awardedById], references: [id], onDelete: SetNull)
+
+  @@unique([userId, badge])
+  @@index([userId])
+}
+
+// ─── Currently Exploring (on profile) ───
+
+model CurrentlyExploring {
+  id        String   @id @default(cuid())
+  userId    String
+  topic     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topic])
+  @@index([userId])
+}

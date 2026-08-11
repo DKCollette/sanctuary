@@ -1,0 +1,43 @@
+# Environment
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Database
+prisma/dev.db
+prisma/dev.db-journal
+
+# Build
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts
