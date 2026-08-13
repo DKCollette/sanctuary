@@ -113,7 +113,7 @@ export default function ForumProfilePage() {
     return (
       <main className="max-w-4xl mx-auto px-4 py-8">
         <Link href="/forum" className="inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-muted-foreground mb-6 transition-colors">
-          <ArrowLeft size={14} /> Back to The Sanctuary
+          <ArrowLeft size={14} /> Back to Collettive
         </Link>
 
         {!showAuthForm ? (
@@ -172,7 +172,7 @@ export default function ForumProfilePage() {
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       <Link href="/forum" className="inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-muted-foreground mb-6 transition-colors">
-        <ArrowLeft size={14} /> Back to The Sanctuary
+        <ArrowLeft size={14} /> Back to Collettive
       </Link>
 
       {/* Profile header */}

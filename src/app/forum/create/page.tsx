@@ -222,7 +222,7 @@ function CreatePostForm() {
           disabled={submitting || !title.trim() || !body.trim() || !categoryId}
           className="px-6 py-2.5 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium transition-all disabled:opacity-40"
         >
-          {submitting ? "Sharing..." : "Share with The Sanctuary"}
+          {submitting ? "Sharing..." : "Share with Collettive"}
         </button>
         <Link href="/forum" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors">
           Cancel
@@ -240,7 +240,7 @@ export default function CreatePostPage() {
         className="inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-muted-foreground mb-6 transition-colors"
       >
         <ArrowLeft size={14} />
-        Back to The Sanctuary
+        Back to Collettive
       </Link>
 
       <h1 className="text-2xl font-serif mb-8">Share a Reflection</h1>

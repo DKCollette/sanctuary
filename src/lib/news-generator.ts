@@ -17,6 +17,10 @@ const CATEGORIES = [
   "Mindfulness & Universal News",
 ] as const;
 
+// New dual-axis tagging: newsType (spiritual vs uplifting) + religion (faith tradition)
+export const NEWS_TYPES = ["spiritual", "uplifting", "general"] as const;
+export const RELIGIONS = ["general", "christian", "islamic", "jewish", "hindu", "buddhist", "interfaith"] as const;
+
 const CACHE_DURATION_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 /**
@@ -46,6 +50,13 @@ export async function getNewsFeed(): Promise<NewsItem[]> {
     if (items.length > 0) {
       return items.map(mapDbItem);
     }
+    // Window filter didn't match — return all recent items as fallback
+    const allRecent = await prisma.newsItem.findMany({
+      orderBy: [{ isActiveNow: "desc" }, { createdAt: "desc" }],
+    });
+    if (allRecent.length > 0) {
+      return allRecent.map(mapDbItem);
+    }
   }
 
   // Generate fresh feed
@@ -74,42 +85,70 @@ async function generateAndSaveFeed(): Promise<NewsItem[]> {
 
   const prompt = `Today is ${today}. The ACTUAL Moon phase right now (from astronomical API) is: "${moonData}". The Sun is in ${sunSign} (astronomically verified).
 
-You are the Cosmic Pulse curator for Sanctuary — a space of spiritual stillness and awareness.
+You are a precise Content Curator for the Collettive Pulse feed. Your job is to produce accurate, well-categorized, real-world news items following strict editorial guidelines.
 
-Generate EXACTLY 5 news items — one per category below. Use the exact category names listed. Do NOT add extra items beyond 5.
+## CONTENT CATEGORIES & RULES
 
-1. **Astro / Zodiac Season**: Current Sun sign (${sunSign}), active retrogrades, major aspects, seasonal shifts
-2. **Cosmic Portals & Transits**: Active gateways (Lion's Gate, solstices, equinoxes, 11:11 shifts)
-3. **Lunar Cycles**: REFER TO THE ACTUAL MOON DATA ABOVE. Generate exactly ONE Moon item and it MUST match "${moonData}" — do NOT invent a different moon phase.
-4. **Energetic States & Earth Frequency**: Solar flares, Schumann Resonance, geomagnetic activity
-5. **Mindfulness & Universal News**: Collective consciousness trends, seasonal rituals, modern spiritual practices
+### 1. Cosmic & Spiritual (Factual & Informational) — 3 items
+ONLY factual astronomical, astrological, and planetary event data. Examples: Lion's Gate Portal alignments, solar/lunar eclipses, planetary retrograde dates, solstice/equinox tracking, real-time zodiac season transitions, NASA/JWST space discoveries.
+- Tone: Grounded, informative, mathematically accurate, historically contextualized. NO sensationalized "doomsday" clickbait.
+- Use exact category names: "Astro / Zodiac Season", "Cosmic Portals & Transits", "Lunar Cycles", "Energetic States & Earth Frequency", "Mindfulness & Universal News"
+- REFER TO THE ACTUAL MOON DATA: "${moonData}" — must match exactly.
 
-Use REAL astronomical data for today's date (August 2026). The Lion's Gate Portal peaks August 8. Check current retrogrades, moon phase, and zodiac season.
+### 2. Uplifting & Positive (Real-World Actions & Humanity) — 3 items
+ONLY verified, real-world positive actions, humanitarian milestones, environmental wins, and inspiring community events.
+Examples: Buddhist monks conducting peace walks; interfaith disaster relief; environmental restoration led by faith groups; global acts of charity, healing, unity.
+- Tone: Inspiring, authentic, warm, objective.
+- Use categories: "Human Interest", "Global Kindness", "Breakthroughs", "Community & Connection"
+- Tag with appropriate faith: christian, islamic, buddhist, jewish, hindu, interfaith, or general.
 
-Return ONLY valid JSON — a single array of objects with NO markdown formatting, NO code blocks, NO extra text:
+### 3. Interfaith & Universal — 1 item
+Multi-faith cooperation, shared human values, cross-cultural peace summits, non-denominational spiritual practices.
+- Category: "Interfaith Wisdom & Universal Spirituality"
+- Religion tag: "interfaith"
+
+### 4. Faith-Specific — 1 item
+Accurate, positive, or notable news from one specific tradition. Rotate which tradition each generation.
+- Category: "Faith Spotlight"
+- Religion tag: one of christian, islamic, buddhist, jewish, hindu
+- Use proper terminology (Sangha, Torah, Ramadan, Dharma, Gospel, Mandir).
+
+## FACT-CHECKING RULES
+- ALWAYS verify astronomical dates against real data. The Sun is in ${sunSign} (astronomically verified).
+- For lunar items, the EXACT moon phase is "${moonData}" — do NOT invent a different phase.
+- Do NOT invent news. If no major event is occurring today, report the most recent verified event.
+- No hallucinated celestial events, portals, or alignments that don't exist in real astronomical data.
+
+## OUTPUT FORMAT
+Return ONLY valid JSON — a single array of exactly 8 objects with NO markdown formatting, NO code blocks, NO extra text:
 
 [
   {
     "id": "news_001",
     "title": "...",
-    "category": "...",
+    "category": "Astro / Zodiac Season | Cosmic Portals & Transits | Lunar Cycles | Energetic States & Earth Frequency | Mindfulness & Universal News | Human Interest | Global Kindness | Breakthroughs | Community & Connection | Interfaith Wisdom & Universal Spirituality | Faith Spotlight",
+    "newsType": "spiritual | uplifting | general",
+    "religion": "general | interfaith | christian | islamic | jewish | hindu | buddhist",
     "isActiveNow": true,
     "dateDisplay": "...",
-    "summary": "...",
-    "energeticImpact": "...",
-    "suggestedAction": "..."
+    "summary": "2-3 sentence factual overview",
+    "source": "Publisher or source name",
+    "url": "https://...",
+    "factual_metadata": {
+      "event_type": "Celestial Event | Peace Movement | Interfaith Summit | Humanitarian Milestone | Environmental Win | Faith Celebration",
+      "is_realtime_event": true
+    }
   }
 ]
 
-Rules:
-- id format: news_001, news_002, etc.
-- category must be one of: "Astro / Zodiac Season", "Cosmic Portals & Transits", "Lunar Cycles", "Energetic States & Earth Frequency", "Mindfulness & Universal News"
+RULES:
+- id: news_001 through news_008
 - isActiveNow: true for events happening right now today, false for upcoming
-- dateDisplay: e.g. "Active Now | Aug 8 - Aug 12", "Peak: Tonight", "Current Moon Phase"
-- summary: 2-3 sentences on what's happening
-- energeticImpact: specific emotional/physical/energetic symptoms someone may feel
-- suggestedAction: 1-2 practical steps — journaling, rituals, crystals, etc.
-- Tone: grounded, supportive, accessible. Frame retrogrades as reflection time, not chaos.`;
+- dateDisplay: e.g. "Active Now | Aug 8-12", "Peak: Tonight", "Current Moon Phase"
+- summary: 2-3 factual sentences
+- source: credible name (NASA, Positive News, RNS, Vatican News, etc.)
+- url: placeholder starting with "https://"
+- Tone per category rules above. NO sensationalism.`;
 
   const config = getProviderConfig();
   const response = await fetch(
@@ -161,15 +200,22 @@ Rules:
   // Save to database
   const saved: NewsItem[] = [];
   for (const item of items) {
+    const fm = item.factual_metadata || {};
     const dbItem = await prisma.newsItem.create({
       data: {
         title: item.title,
         category: item.category,
+        newsType: item.newsType || "spiritual",
+        religion: item.religion || "general",
         isActiveNow: item.isActiveNow ?? false,
         dateDisplay: item.dateDisplay,
         summary: item.summary,
-        energeticImpact: item.energeticImpact,
-        suggestedAction: item.suggestedAction,
+        source: item.source || "",
+        url: item.url || "",
+        eventType: fm.event_type || "",
+        isRealtimeEvent: fm.is_realtime_event || false,
+        energeticImpact: item.energeticImpact || "",
+        suggestedAction: item.suggestedAction || "",
       },
     });
     saved.push(mapDbItem(dbItem));
@@ -218,20 +264,34 @@ interface AIGeneratedItem {
   id: string;
   title: string;
   category: string;
+  newsType?: string;
+  religion?: string;
   isActiveNow?: boolean;
   dateDisplay: string;
   summary: string;
-  energeticImpact: string;
-  suggestedAction: string;
+  source?: string;
+  url?: string;
+  factual_metadata?: {
+    event_type: string;
+    is_realtime_event: boolean;
+  };
+  energeticImpact?: string;
+  suggestedAction?: string;
 }
 
 export interface NewsItem {
   id: string;
   title: string;
   category: string;
+  newsType: string;
+  religion: string;
   isActiveNow: boolean;
   dateDisplay: string;
   summary: string;
+  source: string;
+  url: string;
+  eventType: string;
+  isRealtimeEvent: boolean;
   energeticImpact: string;
   suggestedAction: string;
   createdAt: string;
@@ -242,11 +302,17 @@ function mapDbItem(item: any): NewsItem {
     id: item.id,
     title: item.title,
     category: item.category,
+    newsType: item.newsType || "spiritual",
+    religion: item.religion || "general",
     isActiveNow: item.isActiveNow,
     dateDisplay: item.dateDisplay,
     summary: item.summary,
-    energeticImpact: item.energeticImpact,
-    suggestedAction: item.suggestedAction,
+    source: item.source || "",
+    url: item.url || "",
+    eventType: item.eventType || "",
+    isRealtimeEvent: item.isRealtimeEvent || false,
+    energeticImpact: item.energeticImpact || "",
+    suggestedAction: item.suggestedAction || "",
     createdAt: item.createdAt?.toISOString?.() || item.createdAt,
   };
 }

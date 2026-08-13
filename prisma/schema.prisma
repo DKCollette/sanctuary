@@ -41,6 +41,7 @@ model User {
   bookmarkedCategories UserBookmark[]
   tokens              UserToken[]
   stateSnapshots      StateSnapshot[]
+  assessments         Assessment[]
 
   // Forum relations
   forumPosts              ForumPost[]
@@ -157,11 +158,17 @@ model NewsItem {
   id              String   @id @default(cuid())
   title           String
   category        String
+  newsType        String   @default("spiritual") // "spiritual" | "uplifting" | "general"
+  religion        String   @default("general")   // "christian" | "islamic" | "jewish" | "hindu" | "buddhist" | "interfaith" | "general"
   isActiveNow     Boolean  @default(false)
   dateDisplay     String
   summary         String
-  energeticImpact String
-  suggestedAction String
+  source          String   @default("")
+  url             String   @default("")
+  eventType       String   @default("")
+  isRealtimeEvent Boolean  @default(false)
+  energeticImpact String   @default("")
+  suggestedAction String   @default("")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -188,6 +195,25 @@ model StateSnapshot {
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   message Message? @relation(fields: [messageId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model Assessment {
+  id            String   @id @default(cuid())
+  userId        String
+  tier          String   // "quick" | "balanced" | "deep"
+  status        String   @default("in_progress") // "in_progress" | "completed"
+  currentPhase  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  completedAt   DateTime?
+
+  // Full Q&A and results stored as JSON
+  conversation  String   @default("[]") // [{ question, answer, phase }]
+  results       String?  // Final analysis JSON
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
 }

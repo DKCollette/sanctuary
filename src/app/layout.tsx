@@ -14,7 +14,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Sanctuary — Ask what is on your heart.",
+  title: "Collettive — Ask what is on your heart.",
   description:
     "Enter a space of stillness, truth, compassion, and reflection. AI-powered guidance for life, relationships, and spiritual growth.",
   metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),

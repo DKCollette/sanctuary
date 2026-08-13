@@ -59,7 +59,7 @@ export default function ForumCategoryPage({ params }: { params: Promise<{ slug: 
         className="inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-muted-foreground mb-6 transition-colors"
       >
         <ArrowLeft size={14} />
-        Back to The Sanctuary
+        Back to Collettive
       </Link>
 
       {/* Category header */}

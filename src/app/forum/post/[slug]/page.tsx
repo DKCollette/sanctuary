@@ -156,7 +156,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ slug: str
       <main className="max-w-4xl mx-auto px-4 py-16 text-center">
         <p className="text-muted-foreground">Post not found.</p>
         <Link href="/forum" className="text-primary text-sm mt-2 inline-block hover:underline">
-          Return to The Sanctuary
+          Return to Collettive
         </Link>
       </main>
     );

@@ -10,7 +10,7 @@ interface ScaleProps {
 }
 
 const HAWKINS_LEVELS = [
-  { name: "Enlightenment", min: 700, max: 1000, color: "#FFFFFF", range: "700-1000" },
+  { name: "Enlightenment", min: 700, max: 1000, color: "#F0E6FF", range: "700-1000" },
   { name: "Peace", min: 600, max: 699, color: "#E0B0FF", range: "600-699" },
   { name: "Joy", min: 540, max: 599, color: "#A78BFA", range: "540-599" },
   { name: "Love", min: 500, max: 539, color: "#7C4DFF", range: "500-539" },
@@ -30,6 +30,14 @@ const HAWKINS_LEVELS = [
 ] as const;
 
 function getLevelColor(level: number): string {
+  // Special case: Enlightenment range (700-1000) — blend from purple-pink to white
+  if (level >= 700) {
+    const t = Math.min((level - 700) / 300, 1); // 0 at 700, 1 at 1000
+    const r = Math.round(240 - t * (240 - 255));
+    const g = Math.round(230 - t * (230 - 255));
+    const b = Math.round(255 - t * (255 - 255));
+    return `rgb(${r}, ${g}, ${b})`;
+  }
   for (const l of HAWKINS_LEVELS) {
     if (level >= l.min && level <= l.max) return l.color;
   }
@@ -61,11 +69,11 @@ export default function ConsciousnessScale({ currentLevel, auraColor, tier, hist
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }, [history]);
 
-  // Build timeline path data (y = 0 at top = Enlightenment, 100 at bottom = Shame)
+  // Build timeline path data (y = 0 at bottom = Shame, 100 at top = Enlightenment)
   const timelinePath = useMemo(() => {
     if (sortedHistory.length < 2) return null;
     const points = sortedHistory.map((h) => ({
-      y: 100 - (h.level / maxScale) * 100,
+      y: (h.level / maxScale) * 100,
       level: h.level,
     }));
     return points;
@@ -95,7 +103,7 @@ export default function ConsciousnessScale({ currentLevel, auraColor, tier, hist
             className="w-3 mx-auto rounded-full overflow-hidden"
             style={{
               height: "100%",
-              background: `linear-gradient(to top, #1A1040, #4A148C, #8E24AA, #C62828, #FF4B4B, #FFB74D, #FFD700, #4CAF50, #42A5F5, #7C4DFF, #A78BFA, #E0B0FF, #FFFFFF)`,
+              background: `linear-gradient(to top, #1A1040, #4A148C, #8E24AA, #C62828, #FF4B4B, #FFB74D, #FFD700, #4CAF50, #42A5F5, #7C4DFF, #A78BFA, #E0B0FF, #F0E6FF, #FFFFFF)`,
             }}
           >
             {/* Glow at current position */}
@@ -176,9 +184,10 @@ export default function ConsciousnessScale({ currentLevel, auraColor, tier, hist
         {/* Labels side - evenly spaced, Shame at bottom, Enlightenment at top */}
         <div className="flex-1 relative" style={{ height: `${BAR_HEIGHT}px` }}>
           {HAWKINS_LEVELS.map((level, i) => {
-            // Evenly spaced from bottom (i=16, Shame) to top (i=0, Enlightenment)
+            // Evenly spaced from top (i=0, Enlightenment) to bottom (i=16, Shame)
             const isCurrentLevel = levelIndex === i;
-            const row = HAWKINS_LEVELS.length - 1 - i; // 0 = bottom row (Shame)
+            // i=0 (Enlightenment) at top (row=0), i=16 (Shame) at bottom (row=16)
+            const row = i;
             const topPos = (row / (HAWKINS_LEVELS.length - 1)) * 100;
 
             return (

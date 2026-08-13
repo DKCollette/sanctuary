@@ -29,7 +29,7 @@ export default function CommunityPulse() {
     <div className="border border-border/60 rounded-xl p-6 bg-gradient-to-br from-primary/[0.03] to-transparent">
       <h3 className="text-xs uppercase tracking-widest text-muted-foreground/60 font-medium mb-4 flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-pulse-soft" />
-        The Sanctuary is reflecting on&hellip;
+        Collettive is reflecting on&hellip;
       </h3>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">

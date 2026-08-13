@@ -38,7 +38,7 @@ export default function PrinciplesPage() {
     {
       title: "Spiritual Discussion Is Not Medical or Mental Health Care",
       description:
-        "The Sanctuary is a space for reflection, community, and exploration. It is not a replacement for professional medical, psychiatric, or therapeutic care. If you or someone here is in crisis, please seek qualified professional support.",
+        "Collettive is a space for reflection, community, and exploration. It is not a replacement for professional medical, psychiatric, or therapeutic care. If you or someone here is in crisis, please seek qualified professional support.",
     },
     {
       title: "Everyone Is at a Different Place in Their Journey",
@@ -54,7 +54,7 @@ export default function PrinciplesPage() {
         className="inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-muted-foreground mb-6 transition-colors"
       >
         <ArrowLeft size={14} />
-        Back to The Sanctuary
+        Back to Collettive
       </Link>
 
       <div className="text-center mb-10 animate-sacred-in">
@@ -86,13 +86,13 @@ export default function PrinciplesPage() {
 
       <div className="mt-12 border border-primary/10 rounded-xl p-6 bg-gradient-to-br from-primary/[0.04] to-transparent text-center">
         <p className="text-sm text-muted-foreground/70 italic leading-relaxed">
-          &ldquo;The Sanctuary is not a building. It is a way of being with one another.&rdquo;
+          &ldquo;Collettive is not a building. It is a way of being with one another.&rdquo;
         </p>
       </div>
 
       <footer className="mt-8 text-center">
         <Link href="/forum" className="text-xs text-muted-foreground/50 hover:text-primary transition-colors">
-          ← Return to The Sanctuary
+          ← Return to Collettive
         </Link>
       </footer>
     </main>

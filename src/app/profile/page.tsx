@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Moon, Sun, Lock, User, Sparkles, Heart, BookOpen, Shield, Info, LogOut, ChevronDown, TrendingUp } from "lucide-react";
+import { Moon, Sun, Lock, User, Sparkles, Heart, BookOpen, Shield, Info, LogOut, ChevronDown, TrendingUp, ChevronUp } from "lucide-react";
 import { useTheme } from "next-themes";
 import ConsciousnessScale from "@/components/consciousness-scale";
 
@@ -61,6 +61,7 @@ export default function ProfilePage() {
   const [authError, setAuthError] = useState("");
   const [editingPrefs, setEditingPrefs] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(false);
+  const [expandedRecord, setExpandedRecord] = useState<number | null>(null);
 
   // Preferences editing state
   const [modalities, setModalities] = useState<string[]>([]);
@@ -157,8 +158,17 @@ export default function ProfilePage() {
       <header className="border-b border-border/50 sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="text-xl font-serif text-primary">
-            Sanctuary
+            Collettive
           </Link>
+          <nav className="hidden md:flex items-center gap-1">
+            <Link href="/forum" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-all">🌿 Forum</Link>
+            <Link href="/pulse" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-all">✨ Pulse</Link>
+            <Link href="/profile" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary rounded-full">🧭 Sanctuary</Link>
+            <span className="w-px h-4 bg-border mx-1.5" />
+            <Link href="/about" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-all">About</Link>
+            <Link href="/guidance" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-all">Guidance</Link>
+            <Link href="/privacy" className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-all">Privacy</Link>
+          </nav>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
@@ -315,12 +325,21 @@ export default function ProfilePage() {
                   Consciousness Journey
                 </h2>
                 <div className="space-y-3">
-                  {profile.consciousnessRecords.slice(0, 5).map((record, i) => (
-                    <div
-                      key={i}
-                      className="border border-border rounded-lg p-4"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
+                  {profile.consciousnessRecords.slice(0, 5).map((record, i) => {
+              const isExpanded = expandedRecord === i;
+              const hasResults = record.stateData?.reflectionResults;
+              return (
+                <div
+                  key={i}
+                  className="border border-border rounded-lg"
+                >
+                  {/* Header — always visible */}
+                  <div
+                    className={`p-4 ${isExpanded ? "border-b border-border/50" : ""} ${hasResults ? "cursor-pointer hover:bg-secondary/20 transition-colors" : ""}`}
+                    onClick={() => hasResults && setExpandedRecord(isExpanded ? null : i)}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span
                           className={`inline-block text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full border ${STAGE_COLORS[record.stage] || STAGE_COLORS.Seeking}`}
                         >
@@ -329,45 +348,157 @@ export default function ProfilePage() {
                         <span className="text-xs text-muted-foreground/60">
                           {new Date(record.createdAt).toLocaleDateString()}
                         </span>
+                        {record.sessionSummary?.includes("Guided Reflection") && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/5 text-primary/60 border border-primary/10">
+                            Reflection
+                          </span>
+                        )}
+                        {record.sessionSummary?.includes("Conversation about") && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-500/5 text-violet-400/60 border border-violet-500/10">
+                            Chat
+                          </span>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {record.energeticState}
-                      </p>
-                      {record.milestone && (
-                        <p className="text-xs text-primary/70 mt-1 italic">
-                          ✦ {record.milestone}
-                        </p>
+                      {hasResults && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setExpandedRecord(isExpanded ? null : i); }}
+                          className="p-1 text-muted-foreground/40 hover:text-muted-foreground transition-colors shrink-0"
+                        >
+                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                        </button>
                       )}
-                      {record.stateData && (
-                        <div className="mt-3 pt-3 border-t border-border/50">
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                            <span className="font-medium text-foreground">{record.stateData.avatar.tier}</span>
-                            <span>· {record.stateData.avatar.consciousness_level}</span>
-                            <span>· +{record.stateData.avatar.xp_gained} XP</span>
-                            <span>· {record.stateData.avatar.current_element}</span>
-                          </div>
-                          <div className="grid grid-cols-7 gap-1">
-                            {record.stateData.chakras.map((chakra: any, j: number) => {
-                              const colorMap: Record<string, string> = {
-                                Root: "#FF4B4B", Sacral: "#FF8C42", "Solar Plexus": "#FFD700",
-                                Heart: "#4CAF50", Throat: "#42A5F5", "Third Eye": "#7C4DFF", Crown: "#9B59B6"
-                              };
-                              const statusColor = chakra.status === "blocked" ? "#666" : chakra.status === "overactive" ? "#FFD700" : (colorMap[chakra.name] || "#888");
-                              return (
-                                <div key={j} className="flex flex-col items-center gap-0.5" title={`${chakra.name}: ${chakra.status} (${chakra.intensity_percent}%)`}>
-                                  <div
-                                    className="w-2 h-2 rounded-full"
-                                    style={{ backgroundColor: statusColor, opacity: chakra.status === "blocked" ? 0.4 : 0.9 }}
-                                  />
-                                  <span className="text-[8px] text-muted-foreground/40">{chakra.name === "Solar Plexus" ? "Solar" : chakra.name === "Third Eye" ? "3rd Eye" : chakra.name.substring(0, 4)}</span>
-                                </div>
-                              );
-                            })}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {record.energeticState}
+                    </p>
+                    {record.milestone && (
+                      <p className="text-xs text-primary/70 mt-1 italic">
+                        ✦ {record.milestone}
+                      </p>
+                    )}
+                    {record.stateData && !hasResults && (
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                          <span className="font-medium text-foreground">{record.stateData.avatar.tier}</span>
+                          <span>· {record.stateData.avatar.consciousness_level}</span>
+                          <span>· +{record.stateData.avatar.xp_gained} XP</span>
+                          <span>· {record.stateData.avatar.current_element}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expanded results — only for reflection records */}
+                  {isExpanded && hasResults && (
+                    <div className="p-4 space-y-4 animate-fade-in">
+                      {/* Summary stats */}
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground pb-2 border-b border-border/30">
+                        <span className="font-medium text-foreground">{record.stateData.avatar.tier}</span>
+                        <span>· Level {record.stateData.avatar.consciousness_level}</span>
+                        <span>· +{record.stateData.avatar.xp_gained} XP</span>
+                      </div>
+
+                      {/* Current State */}
+                      {record.stateData.reflectionResults.current_state && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Current State</h4>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{record.stateData.reflectionResults.current_state}</p>
+                        </div>
+                      )}
+
+                      {/* Dominant Emotions */}
+                      {record.stateData.reflectionResults.dominant_emotions?.length > 0 && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Emotional Landscape</h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {record.stateData.reflectionResults.dominant_emotions.map((e: string, j: number) => (
+                              <span key={j} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/5 text-primary/80 border border-primary/10">{e}</span>
+                            ))}
                           </div>
                         </div>
                       )}
+
+                      {/* Strengths */}
+                      {record.stateData.reflectionResults.strengths?.length > 0 && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Strengths</h4>
+                          <ul className="space-y-0.5">
+                            {record.stateData.reflectionResults.strengths.map((s: string, j: number) => (
+                              <li key={j} className="text-sm text-foreground/80 flex items-start gap-1.5">
+                                <span className="text-emerald-400/70 mt-0.5">✦</span>
+                                {s}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Growth Areas */}
+                      {record.stateData.reflectionResults.growth_areas?.length > 0 && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Areas for Growth</h4>
+                          <ul className="space-y-0.5">
+                            {record.stateData.reflectionResults.growth_areas.map((g: string, j: number) => (
+                              <li key={j} className="text-sm text-foreground/80 flex items-start gap-1.5">
+                                <span className="text-amber-400/70 mt-0.5">○</span>
+                                {g}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Emotional Patterns */}
+                      {record.stateData.reflectionResults.emotional_patterns && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Emotional Patterns</h4>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{record.stateData.reflectionResults.emotional_patterns}</p>
+                        </div>
+                      )}
+
+                      {/* Purpose Alignment */}
+                      {record.stateData.reflectionResults.purpose_alignment && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Purpose & Alignment</h4>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{record.stateData.reflectionResults.purpose_alignment}</p>
+                        </div>
+                      )}
+
+                      {/* Affirmation */}
+                      {record.stateData.reflectionResults.affirmation && (
+                        <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+                          <p className="text-[10px] uppercase tracking-wider text-primary/50 font-medium mb-1">Affirmation</p>
+                          <p className="text-sm font-serif italic text-primary/80 leading-relaxed">&ldquo;{record.stateData.reflectionResults.affirmation}&rdquo;</p>
+                        </div>
+                      )}
+
+                      {/* Practices */}
+                      {record.stateData.reflectionResults.practices?.length > 0 && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Recommended Practices</h4>
+                          <ul className="space-y-0.5">
+                            {record.stateData.reflectionResults.practices.map((p: string, j: number) => (
+                              <li key={j} className="text-sm text-foreground/80 flex items-start gap-1.5">
+                                <span className="text-primary/50 mt-0.5">·</span>
+                                {p}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Suggested Action */}
+                      {record.stateData.reflectionResults.suggested_action && (
+                        <div>
+                          <h4 className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1">Suggested Action</h4>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{record.stateData.reflectionResults.suggested_action}</p>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
+                </div>
+              );
+            })}
                 </div>
               </section>
             )}

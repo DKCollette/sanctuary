@@ -56,7 +56,7 @@ export default function ForumHomePage() {
       {/* Hero */}
       <section className="text-center mb-10 animate-sacred-in">
         <h1 className="text-4xl md:text-5xl font-serif font-light text-primary mb-3 sacred-glow inline-block">
-          The Sanctuary
+          Collettive
         </h1>
         <p className="text-base md:text-lg text-muted-foreground font-serif italic max-w-xl mx-auto">
           A space to question, reflect, learn, and grow together.
@@ -189,7 +189,7 @@ export default function ForumHomePage() {
       {/* Footer */}
       <footer className="border-t border-border/30 pt-8 pb-4 text-center">
         <p className="text-xs text-muted-foreground/40 max-w-lg mx-auto leading-relaxed">
-          The Sanctuary is a space for exploration, not dogma. Share from your experience.
+          Collettive is a space for exploration, not dogma. Share from your experience.
           Leave room for others to discover their own truth.
         </p>
         <div className="flex items-center justify-center gap-4 mt-4">

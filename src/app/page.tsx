@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect, FormEvent, KeyboardEvent } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Send, Copy, RotateCcw, ThumbsUp, ThumbsDown, Trash2, Plus, Menu, X, Info, BookOpen, Shield, Sparkles, User, ChevronDown } from "lucide-react";
+import { Moon, Sun, Send, Copy, RotateCcw, ThumbsUp, ThumbsDown, Trash2, Plus, Menu, X, Info, BookOpen, Shield, Sparkles, User, ChevronDown, Compass, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import StateDashboard from "@/components/state-dashboard";
+import AssessmentSelector from "@/components/assessment-selector";
+import AssessmentFlow from "@/components/assessment-flow";
 
 const EXAMPLE_QUESTIONS = [
   "I feel lost in my purpose. How do I find meaning again?",
@@ -40,14 +43,30 @@ interface ConversationData {
   messages: MessageData[];
 }
 
-function LandingContent() {
+function LandingContent({
+  onStartAssessment,
+  question,
+  setQuestion,
+  handleSubmit,
+  handleKeyDown,
+  isStreaming,
+  textareaRef,
+}: {
+  onStartAssessment?: () => void;
+  question: string;
+  setQuestion: (v: string) => void;
+  handleSubmit: (e?: any) => void;
+  handleKeyDown: (e: any) => void;
+  isStreaming: boolean;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+}) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-16">
-      <div className="text-center max-w-3xl mx-auto space-y-8">
-        {/* Logo / Name */}
+    <div className="flex flex-col items-center px-4 py-12 md:py-16">
+      {/* Hero section */}
+      <div className="text-center max-w-3xl mx-auto space-y-8 mb-16">
         <div className="space-y-2">
-          <h1 className="text-6xl md:text-8xl font-serif font-light tracking-wider text-primary dark:text-primary">
-            Sanctuary
+          <h1 className="text-6xl md:text-8xl font-serif font-light tracking-wider text-primary dark:text-primary sacred-glow">
+            Collettive
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground font-serif italic">
             Ask what is on your heart.
@@ -77,12 +96,162 @@ function LandingContent() {
             </button>
           ))}
         </div>
+
+        {/* Assessment / Guided Reflection button */}
+        {onStartAssessment && (
+          <div>
+            <button
+              onClick={onStartAssessment}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all text-sm font-medium"
+            >
+              <Compass size={16} />
+              Daily Guided Reflection
+            </button>
+            <p className="text-[10px] text-muted-foreground/40 mt-2">
+              An adaptive practice for daily insight, clarity, and self-discovery
+            </p>
+          </div>
+        )}
+
+        {/* Chat input — speak freely */}
+        <div className="w-full max-w-lg mx-auto">
+          <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+            <div className="flex-1 relative">
+              <textarea
+                ref={textareaRef}
+                data-sanctuary-input
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Speak freely. What are you carrying?"
+                rows={1}
+                className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 pr-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 placeholder:text-muted-foreground/60 transition-all min-h-[48px] max-h-[160px]"
+                style={{ height: "auto" }}
+                onInput={(e) => {
+                  const el = e.currentTarget;
+                  el.style.height = "auto";
+                  el.style.height = Math.min(el.scrollHeight, 160) + "px";
+                }}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={!question.trim() || isStreaming}
+              className="bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground rounded-xl p-3 transition-all shrink-0"
+            >
+              <Send size={18} />
+            </button>
+          </form>
+          <p className="text-xs text-muted-foreground/60 text-center mt-3">
+            Collettive is an AI reflection guide, not a professional counselor, medical provider, or divine authority.{" "}
+            <a href="/privacy" className="underline hover:text-foreground">Privacy</a> ·{" "}
+            <a href="/guidance" className="underline hover:text-foreground">About this guide</a>
+          </p>
+        </div>
+      </div>
+
+      {/* Explore Collettive - section previews */}
+      <div className="w-full max-w-4xl mx-auto space-y-6">
+        <div className="text-center mb-4">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 font-medium">
+            Explore Collettive
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <ExploreCard
+            icon="💬"
+            title="Inner Chat"
+            description="Speak freely. Ask what's on your heart — about life, purpose, relationships, or the quiet questions in between."
+            href={undefined}
+            onClick={() => {
+              const input = document.querySelector<HTMLTextAreaElement>('[data-sanctuary-input]');
+              if (input) input.focus();
+            }}
+          />
+          <ExploreCard
+            icon="✨"
+            title="Cosmic Pulse"
+            description="Real-time cosmic news, lunar phases, energetic shifts, and what the universe is whispering right now."
+            href="/pulse"
+          />
+          <ExploreCard
+            icon="🌿"
+            title="The Forum"
+            description="A community space to question, reflect, learn, and grow together. Share your journey or discover others."
+            href="/forum"
+          />
+          <ExploreCard
+            icon="🧭"
+            title="Your Collettive"
+            description="Track your consciousness journey, revisit past reflections, and watch your growth unfold over time."
+            href="/profile"
+          />
+        </div>
+
+        {/* Secondary links */}
+        <div className="flex items-center justify-center gap-6 pt-4">
+          <Link
+            href="/guidance"
+            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+          >
+            About the guide
+          </Link>
+          <span className="text-muted-foreground/20">·</span>
+          <Link
+            href="/about"
+            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+          >
+            About Collettive
+          </Link>
+          <span className="text-muted-foreground/20">·</span>
+          <Link
+            href="/privacy"
+            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+          >
+            Privacy
+          </Link>
+        </div>
       </div>
     </div>
   );
 }
 
-export default function SanctuaryApp() {
+function ExploreCard({
+  icon,
+  title,
+  description,
+  href,
+  onClick,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+  href?: string;
+  onClick?: () => void;
+}) {
+  const classes = "group block border border-border/50 rounded-xl p-4 hover:border-primary/20 hover:bg-secondary/30 transition-all duration-300 text-left";
+
+  const content = (
+    <>
+      <span className="text-xl mb-2 block">{icon}</span>
+      <h3 className="text-sm font-serif font-medium text-foreground mb-1 group-hover:text-primary transition-colors">
+        {title}
+      </h3>
+      <p className="text-xs text-muted-foreground/70 leading-relaxed">
+        {description}
+      </p>
+    </>
+  );
+
+  if (href) {
+    return <Link href={href} className={classes}>{content}</Link>;
+  }
+
+  return <button onClick={onClick} className={classes}>{content}</button>;
+}
+
+export default function CollettiveApp() {
   const [question, setQuestion] = useState("");
   const [conversation, setConversation] = useState<ConversationData | null>(null);
   const [streamingContent, setStreamingContent] = useState("");
@@ -95,6 +264,8 @@ export default function SanctuaryApp() {
   const [stateData, setStateData] = useState<any>(null);
   const [conversations, setConversations] = useState<{ id: string; title: string }[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [showAssessment, setShowAssessment] = useState(false);
+  const [assessmentTier, setAssessmentTier] = useState<"quick" | "balanced" | "deep" | null>(null);
   const { theme, setTheme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -336,16 +507,20 @@ export default function SanctuaryApp() {
               onClick={handleNewConversation}
               className="text-xl font-serif text-primary hover:text-primary/80 transition-colors"
             >
-              Sanctuary
+              Collettive
             </button>
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
-            <NavLink href="/about" icon={<Info size={14} color="#60a5fa" />} label="About" />
-            <NavLink href="/guidance" icon={<BookOpen size={14} color="#f59e0b" />} label="Guidance" />
+            {/* Service links */}
             <NavLink href="/forum" icon={<span className="text-xs" style={{ color: "#4ade80" }}>🌿</span>} label="Forum" />
             <NavLink href="/pulse" icon={<Sparkles size={14} color="#a78bfa" />} label="Pulse" />
             <NavLink href="/profile" icon={<User size={14} color="#2dd4bf" />} label="Sanctuary" />
+            {/* Divider */}
+            <span className="w-px h-4 bg-border mx-1.5" />
+            {/* Info links */}
+            <NavLink href="/about" icon={<Info size={14} color="#60a5fa" />} label="About" />
+            <NavLink href="/guidance" icon={<BookOpen size={14} color="#f59e0b" />} label="Guidance" />
             <NavLink href="/privacy" icon={<Shield size={14} color="#94a3b8" />} label="Privacy" />
           </nav>
 
@@ -363,11 +538,13 @@ export default function SanctuaryApp() {
         {/* Mobile nav */}
         {showMobileNav && (
           <div className="md:hidden border-t border-border/50 bg-background px-4 py-2 space-y-1">
-            <MobileNavLink href="/about" icon={<Info size={14} color="#60a5fa" />} label="About" />
-            <MobileNavLink href="/guidance" icon={<BookOpen size={14} color="#f59e0b" />} label="Guidance" />
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium pt-1 pb-1">Services</p>
             <MobileNavLink href="/forum" icon={<span className="text-xs" style={{ color: "#4ade80" }}>🌿</span>} label="Forum" />
             <MobileNavLink href="/pulse" icon={<Sparkles size={14} color="#a78bfa" />} label="Pulse" />
             <MobileNavLink href="/profile" icon={<User size={14} color="#2dd4bf" />} label="Sanctuary" />
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium pt-3 pb-1">Information</p>
+            <MobileNavLink href="/about" icon={<Info size={14} color="#60a5fa" />} label="About" />
+            <MobileNavLink href="/guidance" icon={<BookOpen size={14} color="#f59e0b" />} label="Guidance" />
             <MobileNavLink href="/privacy" icon={<Shield size={14} color="#94a3b8" />} label="Privacy" />
           </div>
         )}
@@ -375,10 +552,44 @@ export default function SanctuaryApp() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
-        {!conversation ? (
-          <LandingContent />
-        ) : (
-          /* Chat interface */
+        {!conversation && !showAssessment && (
+          <LandingContent
+            onStartAssessment={() => setShowAssessment(true)}
+            question={question}
+            setQuestion={setQuestion}
+            handleSubmit={handleSubmit}
+            handleKeyDown={handleKeyDown}
+            isStreaming={isStreaming}
+            textareaRef={textareaRef}
+          />
+        )}
+
+        {!conversation && showAssessment && !assessmentTier && (
+          <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+            <button
+              onClick={() => setShowAssessment(false)}
+              className="self-start max-w-3xl w-full mx-auto inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-muted-foreground mb-4 transition-colors"
+            >
+              <ArrowLeft size={14} /> Back
+            </button>
+            <div className="w-full max-w-4xl">
+              <AssessmentSelector onSelect={(tier) => setAssessmentTier(tier)} />
+            </div>
+          </div>
+        )}
+
+        {!conversation && assessmentTier && (
+          <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+            <div className="w-full max-w-2xl">
+              <AssessmentFlow
+                tier={assessmentTier}
+                onBack={() => setAssessmentTier(null)}
+              />
+            </div>
+          </div>
+        )}
+
+        {conversation && (
           <div className="flex-1 flex flex-col max-w-3xl w-full mx-auto px-4 py-6">
             <div className="flex-1 space-y-6 overflow-y-auto pb-4">
               {conversation.messages.map((msg) => (
@@ -493,7 +704,8 @@ export default function SanctuaryApp() {
           </div>
         )}
 
-        {/* Input area */}
+        {conversation && (
+        /* Input area - only shown during chat */
         <div className="border-t border-border/50 bg-background/80 backdrop-blur-md">
           <div className="max-w-3xl mx-auto px-4 py-4">
             {/* Mode selector */}
@@ -556,12 +768,13 @@ export default function SanctuaryApp() {
 
             {/* Disclaimer */}
             <p className="text-xs text-muted-foreground/60 text-center mt-3">
-              Sanctuary is an AI reflection guide, not a professional counselor, medical provider, or divine authority.{" "}
+              Collettive is an AI reflection guide, not a professional counselor, medical provider, or divine authority.{" "}
               <a href="/privacy" className="underline hover:text-foreground">Privacy</a> ·{" "}
               <a href="/guidance" className="underline hover:text-foreground">About this guide</a>
             </p>
           </div>
         </div>
+        )}
       </main>
     </div>
   );

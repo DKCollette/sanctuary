@@ -94,7 +94,7 @@ function SearchContent() {
             <section className="mb-8">
               <h2 className="text-xs uppercase tracking-widest text-muted-foreground/60 font-medium mb-3 flex items-center gap-2">
                 <TrendingUp size={14} />
-                Trending in The Sanctuary
+                Trending in Collettive
               </h2>
               <div className="flex flex-wrap gap-2">
                 {trending.map((topic, i) => (
@@ -194,7 +194,7 @@ export default function SearchPage() {
         className="inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-muted-foreground mb-6 transition-colors"
       >
         <ArrowRight size={14} className="rotate-180" />
-        Back to The Sanctuary
+        Back to Collettive
       </Link>
 
       <h1 className="text-2xl font-serif mb-2">Discover</h1>

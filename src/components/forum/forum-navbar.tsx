@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Menu, X, Search, User, Home, BookOpen, Shield } from "lucide-react";
+import { Moon, Sun, Menu, X, Search, User, Home, BookOpen, Shield, Sparkles } from "lucide-react";
 
 export default function ForumNavbar() {
   const pathname = usePathname();
@@ -32,10 +32,10 @@ export default function ForumNavbar() {
           </button>
 
           <Link
-            href="/forum"
+            href="/"
             className="text-lg font-serif text-primary hover:text-primary/80 transition-colors flex items-center gap-2"
           >
-            <span className="text-xl">The Sanctuary</span>
+            <span className="text-xl">Collettive</span>
           </Link>
         </div>
 
@@ -43,7 +43,10 @@ export default function ForumNavbar() {
           <NavLink href="/forum" icon={<Home size={14} />} label="Home" isActive={pathname === "/forum"} />
           <NavLink href="/forum/search" icon={<Search size={14} />} label="Discover" isActive={isActive("/forum/search")} />
           <NavLink href="/forum/principles" icon={<BookOpen size={14} />} label="Principles" isActive={pathname === "/forum/principles"} />
+          <span className="w-px h-4 bg-border mx-1.5" />
           <NavLink href="/" icon={<span className="text-xs">⌂</span>} label="Main" isActive={pathname === "/"} />
+          <NavLink href="/pulse" icon={<Sparkles size={14} color="#a78bfa" />} label="Pulse" isActive={false} />
+          <NavLink href="/profile" icon={<User size={14} color="#2dd4bf" />} label="Sanctuary" isActive={false} />
         </nav>
 
         <div className="flex items-center gap-1">
