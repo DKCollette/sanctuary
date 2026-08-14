@@ -10,12 +10,48 @@ import StateDashboard from "@/components/state-dashboard";
 import AssessmentSelector from "@/components/assessment-selector";
 import AssessmentFlow from "@/components/assessment-flow";
 
-const EXAMPLE_QUESTIONS = [
-  "I feel lost in my purpose. How do I find meaning again?",
-  "How can I forgive someone who hurt me deeply?",
-  "What is the spiritual significance of suffering?",
-  "How do I quiet my anxious thoughts and find peace?",
-  "I'm struggling with a major life decision. What do I do?",
+// Four core pillars
+const PILLARS = [
+  {
+    id: "collettive",
+    icon: "☀",
+    title: "Collettive",
+    tagline: "Collective Consciousness",
+    description: "Global spiritual insights, shared wisdom, and the evolving consciousness of the whole.",
+    href: "/",
+    color: "from-amber-500/10 to-amber-600/5 border-amber-500/20 hover:border-amber-400/30",
+    iconColor: "text-amber-400",
+  },
+  {
+    id: "sanctuary",
+    icon: "🧭",
+    title: "Sanctuary",
+    tagline: "Personal Refuge",
+    description: "A safe space for personal grounding, private alignment, and your inner journey.",
+    href: "/profile",
+    color: "from-teal-500/10 to-teal-600/5 border-teal-500/20 hover:border-teal-400/30",
+    iconColor: "text-teal-400",
+  },
+  {
+    id: "pulse",
+    icon: "✨",
+    title: "Pulse",
+    tagline: "Cosmic News & Updates",
+    description: "Hear the universe — cosmic events, daily mindfulness, faith traditions, and global stories.",
+    href: "/pulse",
+    color: "from-violet-500/10 to-violet-600/5 border-violet-500/20 hover:border-violet-400/30",
+    iconColor: "text-violet-400",
+  },
+  {
+    id: "forum",
+    icon: "🌿",
+    title: "Forum",
+    tagline: "Community & Reflection",
+    description: "A place for discussion, reflection, journaling, and growing together.",
+    href: "/forum",
+    color: "from-emerald-500/10 to-emerald-600/5 border-emerald-500/20 hover:border-emerald-400/30",
+    iconColor: "text-emerald-400",
+  },
 ];
 
 const MODES = [
@@ -60,12 +96,35 @@ function LandingContent({
   isStreaming: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }) {
+  const [prompts, setPrompts] = useState<{ question: string; band: string; scaleLabel: string; scaleRange: string; scaleColor: string }[]>([]);
+  const [promptsLoading, setPromptsLoading] = useState(true);
+
+  // Fetch adaptive prompts on mount
+  useEffect(() => {
+    async function loadPrompts() {
+      try {
+        const res = await fetch("/api/prompts");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.prompts?.length === 4) {
+            setPrompts(data.prompts);
+          }
+        }
+      } catch {
+        // Use empty — the component handles this gracefully
+      } finally {
+        setPromptsLoading(false);
+      }
+    }
+    loadPrompts();
+  }, []);
+
   return (
     <div className="flex flex-col items-center px-4 py-12 md:py-16">
       {/* Hero section */}
       <div className="text-center max-w-3xl mx-auto space-y-8 mb-16">
         <div className="space-y-2">
-          <h1 className="text-6xl md:text-8xl font-serif font-light tracking-wider text-primary dark:text-primary sacred-glow">
+          <h1 className="text-6xl md:text-8xl font-serif font-light tracking-wider text-primary dark:text-primary sacred-glow wings-aura wings-aura-lg">
             Collettive
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground font-serif italic">
@@ -74,28 +133,53 @@ function LandingContent({
         </div>
 
         <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-          Enter a space of stillness, truth, compassion, and reflection.
+          Many voices, one heartbeat. Welcome to the family of consciousness, for both light and dark.
         </p>
 
-        {/* Quick questions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-w-lg mx-auto">
-          {EXAMPLE_QUESTIONS.slice(0, 4).map((q, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                const input = document.querySelector<HTMLTextAreaElement>('[data-sanctuary-input]');
-                if (input) {
-                  input.value = q;
-                  input.focus();
-                  input.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-              }}
-              className="text-xs md:text-sm text-muted-foreground hover:text-primary border border-border rounded-lg px-3 py-2 transition-colors text-left hover:border-primary/50"
-            >
-              {q}
-            </button>
-          ))}
-        </div>
+        {/* Adaptive prompts — Hawkins Scale level indicators */}
+        {!promptsLoading && prompts.length === 4 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg mx-auto">
+            {prompts.map((p, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  const input = document.querySelector<HTMLTextAreaElement>('[data-sanctuary-input]');
+                  if (input) {
+                    input.value = p.question;
+                    input.focus();
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                  }
+                }}
+                className="group relative text-left border border-border rounded-lg px-3.5 py-3 transition-all hover:border-primary/40 hover:bg-secondary/30"
+              >
+                <p className="text-xs md:text-sm text-muted-foreground group-hover:text-primary transition-colors leading-relaxed">
+                  {p.question}
+                </p>
+                {/* Scale indicator */}
+                <div className="flex items-center gap-1.5 mt-2">
+                  <span
+                    className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ backgroundColor: p.scaleColor }}
+                  />
+                  <span className="text-[9px] text-muted-foreground/40 font-medium">
+                    {p.scaleLabel}
+                  </span>
+                  <span className="text-[8px] text-muted-foreground/30">
+                    {p.scaleRange}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {promptsLoading && (
+          <div className="flex items-center justify-center gap-2 py-4">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: "0.2s" }} />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: "0.4s" }} />
+          </div>
+        )}
 
         {/* Assessment / Guided Reflection button */}
         {onStartAssessment && (
@@ -150,105 +234,58 @@ function LandingContent({
         </div>
       </div>
 
-      {/* Explore Collettive - section previews */}
+      {/* Four Pillars */}
       <div className="w-full max-w-4xl mx-auto space-y-6">
-        <div className="text-center mb-4">
+        <div className="text-center mb-2">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 font-medium">
             Explore Collettive
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <ExploreCard
-            icon="💬"
-            title="Inner Chat"
-            description="Speak freely. Ask what's on your heart — about life, purpose, relationships, or the quiet questions in between."
-            href={undefined}
-            onClick={() => {
-              const input = document.querySelector<HTMLTextAreaElement>('[data-sanctuary-input]');
-              if (input) input.focus();
-            }}
-          />
-          <ExploreCard
-            icon="✨"
-            title="Cosmic Pulse"
-            description="Real-time cosmic news, lunar phases, energetic shifts, and what the universe is whispering right now."
-            href="/pulse"
-          />
-          <ExploreCard
-            icon="🌿"
-            title="The Forum"
-            description="A community space to question, reflect, learn, and grow together. Share your journey or discover others."
-            href="/forum"
-          />
-          <ExploreCard
-            icon="🧭"
-            title="Your Collettive"
-            description="Track your consciousness journey, revisit past reflections, and watch your growth unfold over time."
-            href="/profile"
-          />
+          {PILLARS.map((p) => (
+            <Link
+              key={p.id}
+              href={p.href}
+              className={`group block border rounded-xl p-4 transition-all duration-300 bg-gradient-to-b ${p.color}`}
+            >
+              <span className={`text-xl mb-2 block ${p.iconColor}`}>{p.icon}</span>
+              <h3 className="text-sm font-serif font-medium text-foreground mb-0.5 group-hover:text-primary transition-colors">
+                {p.title}
+              </h3>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-medium mb-1.5">
+                {p.tagline}
+              </p>
+              <p className="text-xs text-muted-foreground/70 leading-relaxed">
+                {p.description}
+              </p>
+            </Link>
+          ))}
         </div>
 
         {/* Secondary links */}
-        <div className="flex items-center justify-center gap-6 pt-4">
-          <Link
-            href="/guidance"
-            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-          >
-            About the guide
-          </Link>
-          <span className="text-muted-foreground/20">·</span>
-          <Link
-            href="/about"
-            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-          >
-            About Collettive
-          </Link>
-          <span className="text-muted-foreground/20">·</span>
-          <Link
-            href="/privacy"
-            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-          >
-            Privacy
-          </Link>
+        <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-2 pt-4">
+        <Link href="/principles" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">Principles</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/standard" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">Standard</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/covenant" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">Covenant</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/ledger" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">Open Ledger</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/governance" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">Governance</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/impact" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">Impact</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/guidance" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">About the guide</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/about" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">About</Link>
+        <span className="text-muted-foreground/20">·</span>
+        <Link href="/privacy" className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors">Privacy</Link>
         </div>
       </div>
     </div>
   );
-}
-
-function ExploreCard({
-  icon,
-  title,
-  description,
-  href,
-  onClick,
-}: {
-  icon: string;
-  title: string;
-  description: string;
-  href?: string;
-  onClick?: () => void;
-}) {
-  const classes = "group block border border-border/50 rounded-xl p-4 hover:border-primary/20 hover:bg-secondary/30 transition-all duration-300 text-left";
-
-  const content = (
-    <>
-      <span className="text-xl mb-2 block">{icon}</span>
-      <h3 className="text-sm font-serif font-medium text-foreground mb-1 group-hover:text-primary transition-colors">
-        {title}
-      </h3>
-      <p className="text-xs text-muted-foreground/70 leading-relaxed">
-        {description}
-      </p>
-    </>
-  );
-
-  if (href) {
-    return <Link href={href} className={classes}>{content}</Link>;
-  }
-
-  return <button onClick={onClick} className={classes}>{content}</button>;
 }
 
 export default function CollettiveApp() {
@@ -505,7 +542,7 @@ export default function CollettiveApp() {
             </button>
             <button
               onClick={handleNewConversation}
-              className="text-xl font-serif text-primary hover:text-primary/80 transition-colors"
+              className="text-xl font-serif text-primary hover:text-primary/80 transition-colors wings-aura"
             >
               Collettive
             </button>

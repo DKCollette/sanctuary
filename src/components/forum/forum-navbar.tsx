@@ -35,7 +35,7 @@ export default function ForumNavbar() {
             href="/"
             className="text-lg font-serif text-primary hover:text-primary/80 transition-colors flex items-center gap-2"
           >
-            <span className="text-xl">Collettive</span>
+            <span className="text-xl wings-aura">Collettive</span>
           </Link>
         </div>
 

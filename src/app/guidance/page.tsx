@@ -44,8 +44,8 @@ export default function GuidancePage() {
     <div className="min-h-screen">
       <header className="border-b border-border/50">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center">
-          <Link href="/" className="text-xl font-serif text-primary">
-            Sanctuary
+          <Link href="/" className="text-xl font-serif text-primary wings-aura">
+            Collettive
           </Link>
         </div>
       </header>

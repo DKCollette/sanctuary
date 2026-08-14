@@ -448,3 +448,83 @@ model CurrentlyExploring {
   @@unique([userId, topic])
   @@index([userId])
 }
+
+// ── Sanctuary Standard / Organization Transparency ──
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  website     String?
+  logoUrl     String?
+  joinedAt    DateTime @default(now())
+  covenantVersion String?
+  covenantSignedAt DateTime?
+  verificationLevel String @default("self-reported") // "self-reported" | "documented" | "independently-verified"
+  isSanctuary Boolean  @default(false) // true for Collettive itself
+
+  // Financial
+  financialDisclosures FinancialDisclosure[]
+  // Workforce
+  workforceDisclosure  WorkforceDisclosure?
+  // Ownership
+  ownershipDisclosure  OwnershipDisclosure?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FinancialDisclosure {
+  id              String   @id @default(cuid())
+  organizationId  String
+  year            Int
+  revenue         Float?
+  expenses        Float?
+  payroll         Float?
+  ownerDistributions Float?
+  taxes           Float?
+  communityContributions Float?
+  reinvestment    Float?
+  reserves        Float?
+  debt            Float?
+  notes           String?
+  isDemo          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  @@index([organizationId, year])
+}
+
+model WorkforceDisclosure {
+  id              String   @id @default(cuid())
+  organizationId  String  @unique
+  employeeCount   Int?
+  contractorCount Int?
+  lowestCompensation Float?
+  medianCompensation  Float?
+  highestCompensation Float?
+  turnoverRate    Float?
+  benefitsProvided String?
+  isDemo          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model OwnershipDisclosure {
+  id              String   @id @default(cuid())
+  organizationId  String  @unique
+  founders        String? // JSON array
+  owners          String? // JSON array
+  majorInvestors  String? // JSON array
+  parentOrganization String?
+  conflictsOfInterest String?
+  politicalActivity String?
+  isDemo          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}

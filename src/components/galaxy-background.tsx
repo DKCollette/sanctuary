@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 interface Star {
   left: string;
   top: string;
-  size: "sm" | "md" | "lg";
+  size: "sm" | "md" | "lg" | "xl";
   duration: string;
   delay: string;
 }
@@ -20,7 +20,7 @@ function createSeededRandom(seed: number) {
   };
 }
 
-const SIZES = ["sm", "sm", "sm", "md", "md", "lg"] as const;
+const SIZES = ["sm", "sm", "sm", "sm", "md", "md", "md", "lg", "lg", "xl"] as const;
 
 export default function GalaxyBackground() {
   const { resolvedTheme } = useTheme();
@@ -34,14 +34,14 @@ export default function GalaxyBackground() {
 
   const stars = useMemo<Star[]>(() => {
     const rand = createSeededRandom(42);
-    return Array.from({ length: 90 }, (_, i) => {
+    return Array.from({ length: 200 }, (_, i) => {
       const size = SIZES[Math.floor(rand(0, SIZES.length))];
       return {
         left: `${rand(0, 100)}%`,
         top: `${rand(0, 100)}%`,
         size,
-        duration: `${rand(2.5, 7)}s`,
-        delay: `${rand(0, 5)}s`,
+        duration: `${rand(2, 9)}s`,
+        delay: `${rand(0, 6)}s`,
       };
     });
   }, []);
@@ -60,11 +60,16 @@ export default function GalaxyBackground() {
   if (isDark) {
     return (
       <>
+        <div className="night-glow" aria-hidden="true" />
         <div className="galaxy-bg" aria-hidden="true">
           <div className="nebula-orb" />
           <div className="nebula-orb" />
           <div className="nebula-orb" />
           <div className="nebula-orb" />
+        </div>
+        {/* Moon */}
+        <div className="moon-glow" aria-hidden="true">
+          <div className="moon" />
         </div>
         <div className="stars-container" aria-hidden="true">
           {stars.map((star, i) => (
@@ -86,8 +91,77 @@ export default function GalaxyBackground() {
 
   return (
     <div className="sunshine-bg" aria-hidden="true">
-      <div className="sun-orb" />
-      <div className="sun-ray" />
+      {/* Sun Emblem — Top Right (mirrors moon position) */}
+      <div className="sun-emblem-container">
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+          {/* Outer glow rays */}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle) => (
+            <line
+              key={angle}
+              x1="100"
+              y1="100"
+              x2={100 + 80 * Math.cos((angle * Math.PI) / 180)}
+              y2={100 + 80 * Math.sin((angle * Math.PI) / 180)}
+              stroke="rgba(244, 196, 48, 0.15)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          ))}
+          {/* Middle rays */}
+          {[15, 45, 75, 105, 135, 165, 195, 225, 255, 285, 315, 345].map((angle) => (
+            <line
+              key={angle}
+              x1="100"
+              y1="100"
+              x2={100 + 60 * Math.cos((angle * Math.PI) / 180)}
+              y2={100 + 60 * Math.sin((angle * Math.PI) / 180)}
+              stroke="rgba(255, 220, 100, 0.2)"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          ))}
+          {/* Sun core glow */}
+          <circle cx="100" cy="100" r="55" fill="rgba(255, 253, 225, 0.6)" filter="url(#sunBlur)" />
+          {/* Sun body */}
+          <circle cx="100" cy="100" r="35" fill="url(#sunGradient)" />
+          {/* Sun inner highlight */}
+          <circle cx="90" cy="88" r="12" fill="rgba(255, 255, 255, 0.4)" filter="url(#sunBlur)" />
+          <defs>
+            <radialGradient id="sunGradient" cx="40%" cy="35%">
+              <stop offset="0%" stopColor="#FFFDE8" />
+              <stop offset="40%" stopColor="#FCE88A" />
+              <stop offset="80%" stopColor="#F4C430" />
+              <stop offset="100%" stopColor="#E8A820" />
+            </radialGradient>
+            <filter id="sunBlur">
+              <feGaussianBlur stdDeviation="4" />
+            </filter>
+          </defs>
+        </svg>
+      </div>
+      {/* Radiant Heart SVG */}
+      <div className="heart-container">
+        <svg viewBox="0 0 100 100" className="radiant-heart">
+          <defs>
+            <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+            </filter>
+          </defs>
+          {/* Soft Blurred Core */}
+          <path
+            d="M 50,30 A 12,12 0 0,0 26,30 C 26,42 50,65 50,65 C 50,65 74,42 74,30 A 12,12 0 0,0 50,30 Z"
+            fill="rgba(248, 187, 208, 0.3)"
+            filter="url(#softGlow)"
+          />
+          {/* Clear Crisp Outline */}
+          <path
+            d="M 50,30 A 12,12 0 0,0 26,30 C 26,42 50,65 50,65 C 50,65 74,42 74,30 A 12,12 0 0,0 50,30 Z"
+            fill="none"
+            stroke="rgba(248, 187, 208, 0.7)"
+            strokeWidth="1.2"
+          />
+        </svg>
+      </div>
 
       {/* Floating bird */}
       <svg

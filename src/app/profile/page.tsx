@@ -157,7 +157,7 @@ export default function ProfilePage() {
       {/* Header */}
       <header className="border-b border-border/50 sticky top-0 z-40 bg-background/80 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/" className="text-xl font-serif text-primary">
+          <Link href="/" className="text-xl font-serif text-primary wings-aura">
             Collettive
           </Link>
           <nav className="hidden md:flex items-center gap-1">
