@@ -52,6 +52,16 @@ const PILLARS = [
     color: "from-emerald-500/10 to-emerald-600/5 border-emerald-500/20 hover:border-emerald-400/30",
     iconColor: "text-emerald-400",
   },
+  {
+    id: "dreamshare",
+    icon: "🌙",
+    title: "DreamShare",
+    tagline: "Dreams, Visions & Stories",
+    description: "Share and explore dreams, visions, spiritual experiences, and meaningful stories.",
+    href: "/dreamshare",
+    color: "from-violet-500/10 to-indigo-600/5 border-violet-500/20 hover:border-violet-400/30",
+    iconColor: "text-violet-400",
+  },
 ];
 
 const MODES = [

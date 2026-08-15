@@ -4,23 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Menu, X, Search, User, Home, BookOpen, Shield, Sparkles } from "lucide-react";
+import { Moon, Sun, Menu, X, Plus, ArrowLeft } from "lucide-react";
 
-export default function ForumNavbar() {
+export default function DreamShareNavbar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
+  const isCreatePage = pathname === "/dreamshare/create";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/60 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border/30 bg-background/60 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
@@ -31,23 +28,36 @@ export default function ForumNavbar() {
             {showMobileNav ? <X size={20} /> : <Menu size={20} />}
           </button>
 
+          {isCreatePage && (
+            <Link
+              href="/dreamshare"
+              className="md:hidden p-2 -ml-1 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft size={18} />
+            </Link>
+          )}
+
           <Link
-            href="/"
+            href="/dreamshare"
             className="text-lg font-serif text-primary hover:text-primary/80 transition-colors flex items-center gap-2"
           >
-            <span className="text-xl wings-aura">Collettive</span>
+            <span className="text-xl">🌙</span>
+            <span>DreamShare</span>
           </Link>
         </div>
 
         <nav className="hidden md:flex items-center gap-1">
-          <NavLink href="/forum" icon={<Home size={14} />} label="Home" isActive={pathname === "/forum"} />
-          <NavLink href="/forum/search" icon={<Search size={14} />} label="Discover" isActive={isActive("/forum/search")} />
-          <NavLink href="/forum/principles" icon={<BookOpen size={14} />} label="Principles" isActive={pathname === "/forum/principles"} />
+          <NavLink href="/dreamshare" label="Explore" isActive={pathname === "/dreamshare"} />
+          <NavLink
+            href="/dreamshare/create"
+            label="Share"
+            isActive={isCreatePage}
+            icon={<Plus size={14} />}
+          />
           <span className="w-px h-4 bg-border mx-1.5" />
-          <NavLink href="/dreamshare" icon={<span className="text-sm">🌙</span>} label="DreamShare" isActive={false} />
-          <NavLink href="/" icon={<span className="text-xs">⌂</span>} label="Main" isActive={pathname === "/"} />
-          <NavLink href="/pulse" icon={<Sparkles size={14} color="#a78bfa" />} label="Pulse" isActive={false} />
-          <NavLink href="/profile" icon={<User size={14} color="#2dd4bf" />} label="Sanctuary" isActive={false} />
+          <NavLink href="/forum" label="Forum" isActive={false} />
+          <NavLink href="/pulse" label="Pulse" isActive={false} />
+          <NavLink href="/" label="Home" isActive={false} />
         </nav>
 
         <div className="flex items-center gap-1">
@@ -62,31 +72,23 @@ export default function ForumNavbar() {
               <div className="w-[18px] h-[18px]" />
             )}
           </button>
-          <Link
-            href="/forum/profile"
-            className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
-            aria-label="Profile"
-          >
-            <User size={18} />
-          </Link>
         </div>
       </div>
 
       {showMobileNav && (
-        <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md px-4 py-2 space-y-1">
-          <MobileNavLink href="/forum" label="🏠 Home" />
-          <MobileNavLink href="/forum/search" label="🔍 Discover" />
-          <MobileNavLink href="/forum/principles" label="📖 Principles" />
-          <MobileNavLink href="/dreamshare" label="🌙 DreamShare" />
-          <MobileNavLink href="/forum/profile" label="👤 My Profile" />
-          <MobileNavLink href="/" label="← Main Sanctuary" />
+        <div className="md:hidden border-t border-border/30 bg-background/95 backdrop-blur-md px-4 py-2 space-y-1">
+          <MobileNavLink href="/dreamshare" label="🌙 Explore Dreams" />
+          <MobileNavLink href="/dreamshare/create" label="✨ Share an Experience" />
+          <MobileNavLink href="/forum" label="🌿 Forum" />
+          <MobileNavLink href="/pulse" label="✨ Pulse" />
+          <MobileNavLink href="/" label="← Home" />
         </div>
       )}
     </header>
   );
 }
 
-function NavLink({ href, icon, label, isActive }: { href: string; icon: React.ReactNode; label: string; isActive: boolean }) {
+function NavLink({ href, label, isActive, icon }: { href: string; label: string; isActive: boolean; icon?: React.ReactNode }) {
   return (
     <Link
       href={href}
