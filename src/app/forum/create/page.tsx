@@ -14,6 +14,8 @@ const POST_TYPES = [
   { value: "discussion", icon: "💬", label: "Discussion" },
   { value: "journal", icon: "📓", label: "Journal" },
   { value: "resource", icon: "📚", label: "Resource" },
+  { value: "poll", icon: "🗳️", label: "Poll" },
+  { value: "would-you-rather", icon: "⚖️", label: "Would You Rather" },
 ];
 
 function CreatePostForm() {
@@ -31,6 +33,12 @@ function CreatePostForm() {
   const [whatChanged, setWhatChanged] = useState("");
   const [practicingNow, setPracticingNow] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Poll state
+  const [pollOptions, setPollOptions] = useState<{ id: string; emoji: string; text: string; description: string }[]>([]);
+  const [pollReflectionPrompt, setPollReflectionPrompt] = useState("");
+  const [pollAllowChange, setPollAllowChange] = useState(true);
+  const isPollType = postType === "poll" || postType === "would-you-rather";
 
   useEffect(() => {
     fetch("/api/forum/categories")
@@ -66,6 +74,11 @@ function CreatePostForm() {
           realization: realization.trim() || undefined,
           whatChanged: whatChanged.trim() || undefined,
           practicingNow: practicingNow.trim() || undefined,
+          pollOptions: isPollType ? pollOptions : undefined,
+          pollConfig: isPollType ? {
+            allowChangeVote: pollAllowChange,
+            reflectionPrompt: pollReflectionPrompt.trim() || undefined,
+          } : undefined,
         }),
       });
 
@@ -180,6 +193,84 @@ function CreatePostForm() {
           <div>
             <label className="text-xs text-muted-foreground/60 block mb-1">What I&rsquo;m practicing now</label>
             <input value={practicingNow} onChange={(e) => setPracticingNow(e.target.value)} placeholder="Daily practices or habits you've adopted..." className="w-full bg-secondary/30 border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30" />
+          </div>
+        </div>
+      )}
+
+      {/* Poll options (shown for poll/would-you-rather posts) */}
+      {isPollType && (
+        <div className="border border-violet-500/20 rounded-xl p-4 space-y-4 bg-violet-500/5">
+          <p className="text-[10px] uppercase tracking-wider text-violet-400/70 font-medium flex items-center gap-1.5">
+            <span>🗳️</span> Poll Options
+          </p>
+
+          {pollOptions.map((opt, idx) => (
+            <div key={opt.id} className="space-y-2 p-3 rounded-lg bg-secondary/20 border border-border/40">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground/50 font-medium uppercase">
+                  Option {idx + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPollOptions((prev) => prev.filter((o) => o.id !== opt.id))}
+                  className="text-[10px] text-destructive/60 hover:text-destructive"
+                >
+                  Remove
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  value={opt.emoji}
+                  onChange={(e) => setPollOptions((prev) => prev.map((o) => o.id === opt.id ? { ...o, emoji: e.target.value } : o))}
+                  placeholder="Emoji"
+                  maxLength={2}
+                  className="w-14 bg-secondary/40 border border-border rounded-lg px-2 py-2 text-sm text-center focus:outline-none focus:ring-1 focus:ring-primary/30"
+                />
+                <input
+                  value={opt.text}
+                  onChange={(e) => setPollOptions((prev) => prev.map((o) => o.id === opt.id ? { ...o, text: e.target.value } : o))}
+                  placeholder="Option text"
+                  className="flex-1 bg-secondary/40 border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30"
+                />
+              </div>
+              <input
+                value={opt.description}
+                onChange={(e) => setPollOptions((prev) => prev.map((o) => o.id === opt.id ? { ...o, description: e.target.value } : o))}
+                placeholder="Optional short description"
+                className="w-full bg-secondary/40 border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30"
+              />
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (pollOptions.length >= 10) return;
+              const id = String.fromCharCode(97 + pollOptions.length);
+              setPollOptions((prev) => [...prev, { id, emoji: "", text: "", description: "" }]);
+            }}
+            disabled={pollOptions.length >= 10}
+            className="text-xs px-4 py-2 rounded-lg border border-dashed border-violet-500/30 text-violet-400 hover:border-violet-400/50 hover:bg-violet-500/10 transition-all w-full disabled:opacity-40"
+          >
+            + Add Option ({pollOptions.length}/10)
+          </button>
+
+          <div className="space-y-2 pt-2 border-t border-border/30">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={pollAllowChange}
+                onChange={(e) => setPollAllowChange(e.target.checked)}
+                className="rounded border-border bg-secondary/50 text-primary focus:ring-primary/30"
+              />
+              <span className="text-xs text-muted-foreground/70">Allow changing votes</span>
+            </label>
+            <input
+              value={pollReflectionPrompt}
+              onChange={(e) => setPollReflectionPrompt(e.target.value)}
+              placeholder="Optional: Ask voters to reflect on their choice (e.g., 'Why did you choose your answer?')"
+              className="w-full bg-secondary/40 border border-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-primary/30"
+            />
           </div>
         </div>
       )}

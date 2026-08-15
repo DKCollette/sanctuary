@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import ReactionBar, { ReactionSummary } from "@/components/forum/forum-reactions";
 import ReplyTree from "@/components/forum/forum-reply-tree";
+import ForumPoll from "@/components/forum/forum-poll";
 
 interface PostData {
   id: string;
@@ -32,6 +33,9 @@ interface PostData {
   isFollowing: boolean;
   _count: { replies: number; reactions: number; bookmarks: number; followers: number };
   replies: any[];
+  pollOptions?: { id: string; emoji?: string; text: string; description?: string }[] | null;
+  pollConfig?: { allowChangeVote?: boolean; isClosed?: boolean; reflectionPrompt?: string } | null;
+  pollResults?: { total: number; optionCounts: Record<string, number>; userVote: string | null } | null;
 }
 
 const POST_TYPE_STYLES: Record<string, { icon: string; label: string }> = {
@@ -42,6 +46,8 @@ const POST_TYPE_STYLES: Record<string, { icon: string; label: string }> = {
   discussion: { icon: "💬", label: "Discussion" },
   journal: { icon: "📓", label: "Journal" },
   resource: { icon: "📚", label: "Resource" },
+  poll: { icon: "🗳️", label: "Poll" },
+  "would-you-rather": { icon: "⚖️", label: "Would You Rather" },
 };
 
 export default function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -191,15 +197,24 @@ export default function PostDetailPage({ params }: { params: Promise<{ slug: str
         </div>
 
         <h1 className="text-2xl md:text-3xl font-serif font-medium mb-3 leading-tight">
-          {post.title}
-        </h1>
-
-        <div className="flex items-center gap-2 text-xs text-muted-foreground/60 mb-6">
-          <span className="font-medium text-foreground/70">
-            {post.isAnonymous ? "Anonymous" : post.author.displayName}
-          </span>
-          <span>·</span>
-          <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                  {post.title}
+                </h1>
+                {/* Meta row */}
+                <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground/60">
+                  <span className="flex items-center gap-1">
+                    {post.isAnonymous ? "Anonymous" : post.author.displayName}
+                  </span>
+                  {post.postType === "poll" || post.postType === "would-you-rather" ? (
+                    <>
+                      <span>·</span>
+                      <span className="text-primary/60 font-medium">Vote</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>·</span>
+                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                    </>
+                  )}
           <span>·</span>
           <span>{post.viewCount} views</span>
         </div>
@@ -248,6 +263,24 @@ export default function PostDetailPage({ params }: { params: Promise<{ slug: str
             <p className="text-[10px] uppercase tracking-wider text-amber-400/60 mb-1">What I&rsquo;m practicing now</p>
             <p className="text-sm text-foreground/80">{post.practicingNow}</p>
           </div>
+        )}
+
+        {/* Poll / Interactive voting */}
+        {post.pollOptions && post.pollResults && (
+          <section className="my-6">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">{POST_TYPE_STYLES[post.postType]?.icon || "🗳️"}</span>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground/50 font-medium">
+                {POST_TYPE_STYLES[post.postType]?.label || "Poll"}
+              </span>
+            </div>
+            <ForumPoll
+              postId={post.id}
+              options={post.pollOptions}
+              results={post.pollResults}
+              config={post.pollConfig || undefined}
+            />
+          </section>
         )}
 
         {/* Action bar */}

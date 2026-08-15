@@ -17,6 +17,9 @@ interface PostCardProps {
     category: { slug: string; name: string; icon: string; color: string };
     reactionCounts?: Record<string, number>;
     _count: { replies: number; reactions: number; bookmarks: number };
+    pollOptions?: { id: string; emoji?: string; text: string }[] | null;
+    pollConfig?: { isClosed?: boolean } | null;
+    pollVoteCount?: number;
   };
 }
 
@@ -28,6 +31,8 @@ const POST_TYPE_STYLES: Record<string, { icon: string; label: string }> = {
   discussion: { icon: "💬", label: "Discussion" },
   journal: { icon: "📓", label: "Journal" },
   resource: { icon: "📚", label: "Resource" },
+  poll: { icon: "🗳️", label: "Poll" },
+  "would-you-rather": { icon: "⚖️", label: "Would You Rather" },
 };
 
 export default function ForumPostCard({ post }: PostCardProps) {
@@ -67,6 +72,26 @@ export default function ForumPostCard({ post }: PostCardProps) {
             <p className="text-sm text-muted-foreground/80 line-clamp-2 mb-3 leading-relaxed">
               {post.body.replace(/<[^>]*>/g, "").slice(0, 200)}
             </p>
+
+            {/* Poll preview */}
+            {post.pollOptions && post.pollOptions.length > 0 && (
+              <div className="mb-3 p-2.5 rounded-lg bg-violet-500/5 border border-violet-500/15">
+                <div className="flex flex-wrap gap-2">
+                  {post.pollOptions.slice(0, 2).map((opt) => (
+                    <span key={opt.id} className="flex items-center gap-1 text-[11px] text-muted-foreground/70">
+                      {opt.emoji && <span>{opt.emoji}</span>}
+                      <span className="line-clamp-1">{opt.text}</span>
+                    </span>
+                  ))}
+                </div>
+                {post.pollVoteCount !== undefined && (
+                  <span className="text-[10px] text-muted-foreground/40 mt-1 block">
+                    {post.pollVoteCount} {post.pollVoteCount === 1 ? "vote" : "votes"}
+                    {post.pollConfig?.isClosed ? " · Closed" : ""}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Tags */}
             {post.tags && post.tags.length > 0 && (

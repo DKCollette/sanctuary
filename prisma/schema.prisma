@@ -59,6 +59,7 @@ model User {
   dreamShareEntries       DreamShareEntry[]
   dreamShareResonates     DreamShareResonate[]
   dreamShareReflections   DreamShareReflection[]
+  forumPollVotes          ForumPollVote[]
 }
 
 model UserPreferences {
@@ -263,6 +264,12 @@ model ForumPost {
   // Tags stored as JSON array string
   tags           String   @default("[]")
 
+  // Interactive poll fields
+  pollOptions    String?  // JSON array: [{id, emoji, text, description}]
+  pollConfig     String?  // JSON: {allowChangeVote, isClosed, reflectionPrompt, featuredLabel}
+  pollVoteCount  Int      @default(0)
+  isFeatured     Boolean  @default(false)
+
   category ForumCategory @relation(fields: [categoryId], references: [id])
   author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
@@ -271,6 +278,7 @@ model ForumPost {
   bookmarks    ForumBookmark[]
   followers    ForumPostFollower[]
   reports      ForumReport[]
+  pollVotes    ForumPollVote[]
 
   @@index([categoryId, createdAt])
   @@index([authorId])
@@ -360,6 +368,23 @@ model ForumReport {
 
   @@index([postId])
   @@index([replyId])
+}
+
+// ─── Forum Polls / Interactive Voting ───
+
+model ForumPollVote {
+  id             String   @id @default(cuid())
+  postId         String
+  userId         String
+  selectedOption String   // "a" or "b" (matches option id in pollOptions JSON)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
 }
 
 // ─── Daily Reflection ───
