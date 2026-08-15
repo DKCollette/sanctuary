@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenUser } from "@/lib/auth-middleware";
 
+function parseJsonArray(val: string | undefined | null): string[] {
+  try { const p = JSON.parse(val || "[]"); return Array.isArray(p) ? p : []; } catch { return []; }
+}
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -161,8 +165,8 @@ export async function GET(request: NextRequest) {
           consciousnessLevel: latestRecord?.stateData
             ? (JSON.parse(latestRecord.stateData) as any)?.avatar?.consciousness_level || 200
             : 200,
-          recentTopics: prefs?.intentions || [],
-          modalities: prefs?.primaryModalities || [],
+          recentTopics: parseJsonArray(prefs?.intentions),
+          modalities: parseJsonArray(prefs?.primaryModalities),
         };
 
         const prompts = await generatePersonalizedPrompts(profile);

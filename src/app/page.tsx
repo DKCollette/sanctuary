@@ -202,7 +202,7 @@ function LandingContent({
           <form onSubmit={handleSubmit} className="flex gap-2 items-end">
             <div className="flex-1 relative">
               <textarea
-                ref={textareaRef}
+                ref={textareaRef as React.LegacyRef<HTMLTextAreaElement>}
                 data-sanctuary-input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
@@ -778,7 +778,7 @@ export default function CollettiveApp() {
             <form onSubmit={handleSubmit} className="flex gap-2 items-end">
               <div className="flex-1 relative">
                 <textarea
-                  ref={textareaRef}
+                  ref={textareaRef as React.LegacyRef<HTMLTextAreaElement>}
                   data-sanctuary-input
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}

@@ -230,7 +230,7 @@ export async function PUT(request: NextRequest) {
           },
         });
       } catch (err) {
-        logger.warn("Failed to save consciousness reading from assessment", err);
+        logger.warn("Failed to save consciousness reading from assessment", { error: String(err) });
       }
 
       return NextResponse.json({
