@@ -19,6 +19,7 @@ model Conversation {
 
   messages Message[]
   user     User?   @relation(fields: [userId], references: [id])
+  pathWalks PathWalk[]
 }
 
 model User {
@@ -60,6 +61,7 @@ model User {
   dreamShareResonates     DreamShareResonate[]
   dreamShareReflections   DreamShareReflection[]
   forumPollVotes          ForumPollVote[]
+  pathWalks               PathWalk[]
 }
 
 model UserPreferences {
@@ -270,6 +272,9 @@ model ForumPost {
   pollVoteCount  Int      @default(0)
   isFeatured     Boolean  @default(false)
 
+  // Path (shared conversation journey)
+  pathData       String?  // JSON: {intro, reflection, messages[{role,content,createdAt,milestone}], sourceConversationId, ancestorPathId, ancestorPathTitle, conversationDate, modelUsed}
+
   category ForumCategory @relation(fields: [categoryId], references: [id])
   author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
@@ -279,6 +284,7 @@ model ForumPost {
   followers    ForumPostFollower[]
   reports      ForumReport[]
   pollVotes    ForumPollVote[]
+  pathWalks    PathWalk[]
 
   @@index([categoryId, createdAt])
   @@index([authorId])
@@ -385,6 +391,24 @@ model ForumPollVote {
 
   @@unique([postId, userId])
   @@index([postId])
+}
+
+// ─── The Path (Shared AI Conversation Journeys) ───
+
+model PathWalk {
+  id             String   @id @default(cuid())
+  pathPostId     String   // The published Path being walked
+  userId         String   // The person walking the path
+  conversationId String?  // Their resulting private conversation
+  messageIndex   Int?     // If branched from a specific message in the path
+  createdAt      DateTime @default(now())
+
+  pathPost     ForumPost    @relation(fields: [pathPostId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+
+  @@unique([pathPostId, userId, messageIndex])
+  @@index([pathPostId])
 }
 
 // ─── Daily Reflection ───

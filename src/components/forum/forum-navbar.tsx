@@ -43,6 +43,7 @@ export default function ForumNavbar() {
           <NavLink href="/forum" icon={<Home size={14} />} label="Home" isActive={pathname === "/forum"} />
           <NavLink href="/forum/search" icon={<Search size={14} />} label="Discover" isActive={isActive("/forum/search")} />
           <NavLink href="/forum/principles" icon={<BookOpen size={14} />} label="Principles" isActive={pathname === "/forum/principles"} />
+          <NavLink href="/forum/create/path" icon={<span className="text-xs">👣</span>} label="The Path" isActive={pathname.startsWith("/forum/create/path")} />
           <span className="w-px h-4 bg-border mx-1.5" />
           <NavLink href="/dreamshare" icon={<span className="text-sm">🌙</span>} label="DreamShare" isActive={false} />
           <NavLink href="/" icon={<span className="text-xs">⌂</span>} label="Main" isActive={pathname === "/"} />
@@ -77,6 +78,7 @@ export default function ForumNavbar() {
           <MobileNavLink href="/forum" label="🏠 Home" />
           <MobileNavLink href="/forum/search" label="🔍 Discover" />
           <MobileNavLink href="/forum/principles" label="📖 Principles" />
+          <MobileNavLink href="/forum/create/path" label="👣 The Path" />
           <MobileNavLink href="/dreamshare" label="🌙 DreamShare" />
           <MobileNavLink href="/forum/profile" label="👤 My Profile" />
           <MobileNavLink href="/" label="← Main Sanctuary" />

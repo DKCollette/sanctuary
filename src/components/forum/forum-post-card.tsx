@@ -20,6 +20,7 @@ interface PostCardProps {
     pollOptions?: { id: string; emoji?: string; text: string }[] | null;
     pollConfig?: { isClosed?: boolean } | null;
     pollVoteCount?: number;
+    pathData?: { intro?: string; messages?: any[]; reflection?: string; topics?: string[] } | null;
   };
 }
 
@@ -90,10 +91,36 @@ export default function ForumPostCard({ post }: PostCardProps) {
                     {post.pollConfig?.isClosed ? " · Closed" : ""}
                   </span>
                 )}
-              </div>
-            )}
+                            </div>
+                          )}
 
-            {/* Tags */}
+                            {/* Path preview */}
+                            {post.pathData && post.postType === "path" && (
+                              <div className="mb-3 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/15">
+                                <div className="flex items-center gap-1.5 mb-1.5">
+                                  <span className="text-xs">👣</span>
+                                  <span className="text-[10px] uppercase tracking-wider text-indigo-400/60 font-medium">The Path</span>
+                                </div>
+                                {post.pathData.intro && (
+                                  <p className="text-xs text-muted-foreground/80 italic line-clamp-2 leading-relaxed">
+                                    &ldquo;{post.pathData.intro}&rdquo;
+                                  </p>
+                                )}
+                                {post.pathData.messages && (
+                                  <div className="flex items-center gap-2 mt-1.5 text-[10px] text-muted-foreground/50">
+                                    <span>{post.pathData.messages.length} steps</span>
+                                    {post.pathData.topics && post.pathData.topics.length > 0 && (
+                                      <span>· {post.pathData.topics.slice(0, 3).join(", ")}</span>
+                                    )}
+                                  </div>
+                                )}
+                                <span className="inline-flex items-center gap-1 text-[10px] text-indigo-400/60 mt-1.5 group-hover:text-indigo-400 transition-colors">
+                                  Begin The Path →
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Tags */}
             {post.tags && post.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {post.tags.slice(0, 5).map((tag) => (

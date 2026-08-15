@@ -13,9 +13,9 @@ const POST_TYPES = [
   { value: "teaching", icon: "📿", label: "Teaching" },
   { value: "discussion", icon: "💬", label: "Discussion" },
   { value: "journal", icon: "📓", label: "Journal" },
-  { value: "resource", icon: "📚", label: "Resource" },
   { value: "poll", icon: "🗳️", label: "Poll" },
   { value: "would-you-rather", icon: "⚖️", label: "Would You Rather" },
+  { value: "path", icon: "👣", label: "The Path", href: "/forum/create/path" },
 ];
 
 function CreatePostForm() {
@@ -105,21 +105,35 @@ function CreatePostForm() {
           What kind of post is this?
         </label>
         <div className="flex flex-wrap gap-2">
-          {POST_TYPES.map((pt) => (
-            <button
-              key={pt.value}
-              type="button"
-              onClick={() => setPostType(pt.value)}
-              className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border transition-all ${
-                postType === pt.value
-                  ? "bg-primary/15 border-primary/30 text-primary"
-                  : "border-border/60 text-muted-foreground/70 hover:text-muted-foreground hover:border-primary/30"
-              }`}
-            >
-              <span>{pt.icon}</span>
-              {pt.label}
-            </button>
-          ))}
+          {POST_TYPES.map((pt) => {
+            if (pt.href) {
+              return (
+                <Link
+                  key={pt.value}
+                  href={pt.href}
+                  className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-border/60 text-muted-foreground/70 hover:text-muted-foreground hover:border-primary/30"
+                >
+                  <span>{pt.icon}</span>
+                  {pt.label}
+                </Link>
+              );
+            }
+            return (
+              <button
+                key={pt.value}
+                type="button"
+                onClick={() => setPostType(pt.value)}
+                className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border transition-all ${
+                  postType === pt.value
+                    ? "bg-primary/15 border-primary/30 text-primary"
+                    : "border-border/60 text-muted-foreground/70 hover:text-muted-foreground hover:border-primary/30"
+                }`}
+              >
+                <span>{pt.icon}</span>
+                {pt.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

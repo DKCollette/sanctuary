@@ -9,6 +9,7 @@ import ReactMarkdown from "react-markdown";
 import ReactionBar, { ReactionSummary } from "@/components/forum/forum-reactions";
 import ReplyTree from "@/components/forum/forum-reply-tree";
 import ForumPoll from "@/components/forum/forum-poll";
+import PathReader from "@/components/forum/path-reader";
 
 interface PostData {
   id: string;
@@ -36,6 +37,15 @@ interface PostData {
   pollOptions?: { id: string; emoji?: string; text: string; description?: string }[] | null;
   pollConfig?: { allowChangeVote?: boolean; isClosed?: boolean; reflectionPrompt?: string } | null;
   pollResults?: { total: number; optionCounts: Record<string, number>; userVote: string | null } | null;
+  pathData?: {
+    intro: string;
+    reflection: string;
+    messages: { id: string; role: string; content: string; createdAt: string; milestone: string | null }[];
+    sourceConversationId: string;
+    conversationDate: string;
+    modelUsed: string;
+    topics?: string[];
+  } | null;
 }
 
 const POST_TYPE_STYLES: Record<string, { icon: string; label: string }> = {
@@ -279,6 +289,17 @@ export default function PostDetailPage({ params }: { params: Promise<{ slug: str
               options={post.pollOptions}
               results={post.pollResults}
               config={post.pollConfig || undefined}
+            />
+          </section>
+        )}
+
+        {/* Path / Shared Journey */}
+        {post.pathData && post.postType === "path" && (
+          <section className="my-6">
+            <PathReader
+              pathData={post.pathData}
+              postId={post.id}
+              postTitle={post.title}
             />
           </section>
         )}

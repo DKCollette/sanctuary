@@ -86,6 +86,7 @@ export async function GET(req: NextRequest) {
       pollOptions: post.pollOptions ? JSON.parse(post.pollOptions) : null,
       pollConfig: post.pollConfig ? JSON.parse(post.pollConfig) : null,
       pollResults: post.pollOptions ? await getPollResults(post.id, user?.id) : null,
+      pathData: post.pathData ? JSON.parse(post.pathData) : null,
     });
   }
 
@@ -131,6 +132,7 @@ export async function GET(req: NextRequest) {
       reactionCounts: countReactions(p.reactions),
       pollOptions: p.pollOptions ? JSON.parse(p.pollOptions) : null,
       pollConfig: p.pollConfig ? JSON.parse(p.pollConfig) : null,
+      pathData: p.pathData ? JSON.parse(p.pathData) : null,
     })),
     total,
     page,
@@ -155,7 +157,7 @@ export async function POST(req: NextRequest) {
   const category = await prisma.forumCategory.findUnique({ where: { id: categoryId } });
   if (!category) return error("Category not found");
 
-  const validTypes = ["question", "reflection", "experience", "teaching", "discussion", "journal", "resource", "poll", "would-you-rather"];
+  const validTypes = ["question", "reflection", "experience", "teaching", "discussion", "journal", "resource", "poll", "would-you-rather", "path"];
   const postTypeVal = validTypes.includes(postType) ? postType : "reflection";
 
   // Validate poll data
