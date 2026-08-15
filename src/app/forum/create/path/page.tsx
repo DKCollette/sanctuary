@@ -87,7 +87,7 @@ export default function SharePathPage() {
           {conversations.map((conv) => (
             <Link
               key={conv.id}
-              href={`/forum/create/path?conversation=${conv.id}`}
+              href={`/forum/create/path/${conv.id}`}
               className="flex items-center gap-4 p-4 rounded-xl border border-border/50 hover:border-indigo-400/30 hover:bg-indigo-500/5 transition-all group"
             >
               <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
