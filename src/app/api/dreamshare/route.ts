@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getAuthUser, unauthorized, success, error, parseJsonArray } from "@/lib/dreamshare-server";
+import { getAuthUser, unauthorized, success, error, notFound, parseJsonArray } from "@/lib/dreamshare-server";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {

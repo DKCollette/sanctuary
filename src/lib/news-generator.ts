@@ -200,7 +200,7 @@ RULES:
   // Save to database
   const saved: NewsItem[] = [];
   for (const item of items) {
-    const fm = item.factual_metadata || {};
+    const fm = (item.factual_metadata || {}) as Record<string, any>;
     const dbItem = await prisma.newsItem.create({
       data: {
         title: item.title,

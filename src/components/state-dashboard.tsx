@@ -90,7 +90,7 @@ export default function StateDashboard({ data }: { data: StateData }) {
             </li>
             <li className="flex gap-2">
               <span className="text-primary font-medium shrink-0">4.</span>
-              <span>What is one intention you'd like to set for our time together?</span>
+              <span>What is one intention you&apos;d like to set for our time together?</span>
             </li>
           </ol>
         </div>
