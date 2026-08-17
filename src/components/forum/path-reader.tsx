@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Send, ChevronDown, User, Sparkles, RefreshCw } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { PATH_MILESTONES } from "@/lib/path-constants";
 
 interface PathMessage {
@@ -171,13 +172,28 @@ export default function PathReader({ pathData, postId, postTitle }: PathReaderPr
                   </div>
 
                   <div
-                    className={`text-sm leading-relaxed whitespace-pre-wrap rounded-xl p-4 ${
+                    className={`text-sm leading-relaxed rounded-xl p-4 ${
                       isUser
                         ? "bg-secondary/30 border border-border/40 text-foreground/90"
                         : "bg-indigo-500/5 border border-indigo-500/10 text-foreground/85 font-serif italic"
                     }`}
                   >
-                    {msg.content}
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }: any) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                        strong: ({ children }: any) => <strong className="font-semibold text-primary">{children}</strong>,
+                        em: ({ children }: any) => <em className="italic">{children}</em>,
+                        ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-2 text-sm">{children}</ul>,
+                        ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-2 text-sm">{children}</ol>,
+                        blockquote: ({ children }: any) => (
+                          <blockquote className="border-l-2 border-primary/30 pl-3 my-2 text-muted-foreground/80 italic">
+                            {children}
+                          </blockquote>
+                        ),
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
                   </div>
 
                   {/* Branch From Here */}
