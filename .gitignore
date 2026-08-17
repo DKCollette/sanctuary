@@ -41,3 +41,6 @@ coverage/
 # Misc
 *.tsbuildinfo
 next-env.d.ts
+# Database files (never commit user data)
+prisma/prisma/dev.db
+prisma/prisma/*.db*
