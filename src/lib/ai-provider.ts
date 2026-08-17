@@ -26,13 +26,19 @@ const MODE_INSTRUCTIONS: Record<string, string> = {
 };
 
 function loadSystemPrompt(): string {
-  const customPath = process.env.SYSTEM_PROMPT_PATH;
-  if (customPath && fs.existsSync(customPath)) {
-    return fs.readFileSync(customPath, "utf-8");
-  }
-  const defaultPath = path.join(process.cwd(), "src", "lib", "system-prompt.txt");
-  if (fs.existsSync(defaultPath)) {
-    return fs.readFileSync(defaultPath, "utf-8");
+  // Cloudflare Workers has no filesystem access — this is a no-op there.
+  // The default prompt string is returned in that case.
+  try {
+    const customPath = process.env.SYSTEM_PROMPT_PATH;
+    if (customPath && fs.existsSync(customPath)) {
+      return fs.readFileSync(customPath, "utf-8");
+    }
+    const defaultPath = path.join(process.cwd(), "src", "lib", "system-prompt.txt");
+    if (fs.existsSync(defaultPath)) {
+      return fs.readFileSync(defaultPath, "utf-8");
+    }
+  } catch {
+    // fs unavailable (e.g. Workers runtime) — fall through to default
   }
   return `You are Sanctuary, an AI-powered enlightened guide. Be calm, compassionate, and wise. Answer the person beneath the question.`;
 }
