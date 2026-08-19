@@ -62,7 +62,9 @@ model User {
   dreamShareReflections   DreamShareReflection[]
   forumPollVotes          ForumPollVote[]
   pathWalks               PathWalk[]
-}
+    blueprint               UserBlueprint?
+    dailyInsights           DailyInsight[]
+  }
 
 model UserPreferences {
   id                  String   @id @default(cuid())
@@ -656,4 +658,38 @@ model OwnershipDisclosure {
   updatedAt       DateTime @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+// ─── Energetic Blueprint ───
+
+model UserBlueprint {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  blueprint Json     // Full UserBlueprint JSON object
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DailyInsight {
+  id        String    @id @default(cuid())
+  userId    String
+  date      DateTime  @db.Date
+  insight   String
+  source    String    // "astrology" | "humanDesign" | "numerology" | "blended"
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model TransitCache {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @db.Date
+  positions Json     // All planet positions for this date
+  createdAt DateTime @default(now())
 }
