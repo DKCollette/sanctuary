@@ -4,27 +4,7 @@
   "compatibility_date": "2024-11-01",
   "compatibility_flags": ["nodejs_compat"],
   "pages_build_output_dir": ".open-next",
-  "build": {
-    "command": "npm run build:cf",
-    "cwd": "",
-    "watch_dir": "src"
-  },
   "observability": {
     "enabled": true
-  },
-  "env": {
-    "production": {
-      "vars": {
-        "APP_URL": "https://collettive.com",
-        "AI_PROVIDER": "openrouter",
-        "AI_MODEL": "deepseek/deepseek-v4-flash",
-        "RATE_LIMIT_MAX": "30",
-        "RATE_LIMIT_WINDOW_MS": "60000",
-        "MAX_MESSAGE_LENGTH": "4000",
-        "MAX_CONTEXT_MESSAGES": "20",
-        "MAX_OUTPUT_TOKENS": "2048",
-        "SESSION_STORAGE": "server"
-      }
-    }
   }
 }

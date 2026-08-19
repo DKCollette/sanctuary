@@ -66,11 +66,12 @@ function convertValue(v) {
     // Looks like epoch milliseconds (post-1973) → ISO timestamp
     return new Date(v).toISOString();
   }
-  if (typeof v === "number" && (v === 0 || v === 1)) {
-    // SQLite booleans stored as 0/1 integers; keep as-is, pg casts fine,
-    // but Prisma expects proper booleans for boolean columns.
-    return Boolean(v);
-  }
+  // Leave numbers (including 0/1) as-is. pg handles type coercion:
+  //   integer cols ← 1, 0
+  //   boolean cols ← "1", "0" (at driver level)
+  // String booleans from SQLite (rare) need explicit conversion
+  if (v === "true") return true;
+  if (v === "false") return false;
   return v;
 }
 
