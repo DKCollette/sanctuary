@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Pulse RSS Feed Fetcher — writes to PostgreSQL (Neon).
+ * Pulse RSS Feed Fetcher -- writes to PostgreSQL (Neon).
  *
  * Replaces the old fetch-pulse.py which wrote to SQLite.
  * Run via cron: DATABASE_URL=... node scripts/fetch-pulse.mjs

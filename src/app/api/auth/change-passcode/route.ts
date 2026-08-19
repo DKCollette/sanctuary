@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { changePasscode } from "@/lib/profile";
-import { getUserIdFromToken } from "@/lib/auth-middleware";
+import { getTokenUser } from "@/lib/auth-middleware";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    const userId = await getUserIdFromToken(request);
-    if (!userId) {
+    const user = await getTokenUser(request);
+    if (!user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await changePasscode(userId, currentPasscode, newPasscode);
+    await changePasscode(user.id, currentPasscode, newPasscode);
     return NextResponse.json({ success: true });
   } catch (err: any) {
     if (err.message === "Current passcode is incorrect") {

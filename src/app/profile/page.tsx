@@ -50,6 +50,104 @@ const STAGE_COLORS: Record<string, string> = {
   Aligning: "text-rose-400 border-rose-500/20 bg-rose-500/10",
 };
 
+function ChangePasscodeForm() {
+  const [current, setCurrent] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    if (newPass !== confirm) {
+      setMsg({ text: "New passcodes don't match", ok: false });
+      return;
+    }
+    if (newPass.length < 4) {
+      setMsg({ text: "New passcode must be at least 4 characters", ok: false });
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/change-passcode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPasscode: current, newPasscode: newPass }),
+      });
+      if (res.ok) {
+        setMsg({ text: "Passcode changed successfully", ok: true });
+        setCurrent(""); setNewPass(""); setConfirm("");
+      } else {
+        const err = await res.json();
+        setMsg({ text: err.error || "Failed to change passcode", ok: false });
+      }
+    } catch {
+      setMsg({ text: "Connection error", ok: false });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="border border-border rounded-xl p-5 space-y-4">
+      <div>
+        <label className="text-xs text-muted-foreground uppercase tracking-wider font-medium block mb-1">
+          Current Passcode
+        </label>
+        <input
+          type="password"
+          value={current}
+          onChange={(e) => setCurrent(e.target.value)}
+          className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          required
+          minLength={4}
+        />
+      </div>
+      <div>
+        <label className="text-xs text-muted-foreground uppercase tracking-wider font-medium block mb-1">
+          New Passcode
+        </label>
+        <input
+          type="password"
+          value={newPass}
+          onChange={(e) => setNewPass(e.target.value)}
+          className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          required
+          minLength={4}
+        />
+      </div>
+      <div>
+        <label className="text-xs text-muted-foreground uppercase tracking-wider font-medium block mb-1">
+          Confirm New Passcode
+        </label>
+        <input
+          type="password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          required
+          minLength={4}
+        />
+      </div>
+
+      {msg && (
+        <p className={`text-xs ${msg.ok ? "text-emerald-400" : "text-destructive"}`}>
+          {msg.text}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={busy}
+        className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+      >
+        {busy ? "Changing..." : "Change Passcode"}
+      </button>
+    </form>
+  );
+}
+
 export default function ProfilePage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -654,6 +752,15 @@ export default function ProfilePage() {
                 </div>
               </section>
             )}
+
+            {/* Change Passcode */}
+            <section>
+              <h2 className="text-xs uppercase tracking-widest text-muted-foreground/60 font-medium mb-4 flex items-center gap-2">
+                <Lock size={14} />
+                Change Passcode
+              </h2>
+              <ChangePasscodeForm />
+            </section>
 
             {/* Logout */}
             <div className="border-t border-border/50 pt-6">
