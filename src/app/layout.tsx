@@ -10,7 +10,8 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-serif",
-  display: "swap",
+  display: "block",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -27,6 +28,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to Google Fonts to reduce font loading latency */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className={`min-h-screen bg-background text-foreground antialiased ${cormorant.variable}`}>
         <ThemeProvider
           attribute="class"
