@@ -108,6 +108,8 @@ function LandingContent({
 }) {
   const [prompts, setPrompts] = useState<{ question: string; band: string; scaleLabel: string; scaleRange: string; scaleColor: string }[]>([]);
   const [promptsLoading, setPromptsLoading] = useState(true);
+  const [dailyInsight, setDailyInsight] = useState<string | null>(null);
+  const [dailyInsightLoading, setDailyInsightLoading] = useState(true);
 
   // Fetch adaptive prompts on mount
   useEffect(() => {
@@ -127,7 +129,22 @@ function LandingContent({
       }
     }
     loadPrompts();
+    loadDailyInsight();
   }, []);
+
+  async function loadDailyInsight() {
+    try {
+      const res = await fetch("/api/insights/today");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.exists && data.insight) {
+          setDailyInsight(data.insight);
+        }
+      }
+    } catch {} finally {
+      setDailyInsightLoading(false);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center px-4 py-12 md:py-16">
@@ -188,6 +205,21 @@ function LandingContent({
             <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
             <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: "0.2s" }} />
             <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" style={{ animationDelay: "0.4s" }} />
+          </div>
+        )}
+
+        {/* Daily Insight — shows if the user has a blueprint */}
+        {(!dailyInsightLoading && dailyInsight) && (
+          <div className="max-w-lg mx-auto w-full mb-2">
+            <div className="border border-primary/20 rounded-xl p-4 bg-gradient-to-br from-primary/5 to-transparent">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles size={14} className="text-primary" />
+                <p className="text-[10px] uppercase tracking-widest text-primary/60 font-medium">Today&rsquo;s Insight</p>
+              </div>
+              <p className="text-sm text-foreground/90 leading-relaxed font-serif italic">
+                &ldquo;{dailyInsight}&rdquo;
+              </p>
+            </div>
           </div>
         )}
 
