@@ -28,14 +28,17 @@ async function issueToken(userId: string): Promise<string> {
  * Register a new user with display name and passcode.
  */
 export async function registerUser(displayName: string, passcode: string, modalities?: string[]) {
-  const existing = await prisma.user.findUnique({ where: { displayName } });
+  // Case-insensitive check for existing display names
+  const existing = await prisma.user.findFirst({
+    where: { displayName: { equals: displayName, mode: "insensitive" } },
+  });
   if (existing) {
     throw new Error("Display name already taken");
   }
 
   const user = await prisma.user.create({
     data: {
-      displayName,
+      displayName, // Store with original casing
       passcodeHash: hashPasscode(passcode),
       currentStage: "Seeking",
       preferences: {
@@ -65,7 +68,10 @@ export async function registerUser(displayName: string, passcode: string, modali
  * Login returning user. Returns token on success.
  */
 export async function loginUser(displayName: string, passcode: string) {
-  const user = await prisma.user.findUnique({ where: { displayName } });
+  // Case-insensitive display name lookup
+  const user = await prisma.user.findFirst({
+    where: { displayName: { equals: displayName, mode: "insensitive" } },
+  });
   if (!user || user.passcodeHash !== hashPasscode(passcode)) {
     throw new Error("Invalid display name or passcode");
   }
@@ -198,6 +204,32 @@ export async function toggleCategoryBookmark(userId: string, category: string): 
     await prisma.userBookmark.create({ data: { userId, category } });
     return true; // added
   }
+}
+
+/**
+ * Change a user's passcode (requires current passcode for verification).
+ */
+export async function changePasscode(
+  userId: string,
+  currentPasscode: string,
+  newPasscode: string
+) {
+  if (newPasscode.length < 4) {
+    throw new Error("New passcode must be at least 4 characters");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("User not found");
+  if (user.passcodeHash !== hashPasscode(currentPasscode)) {
+    throw new Error("Current passcode is incorrect");
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passcodeHash: hashPasscode(newPasscode) },
+  });
+
+  return { success: true };
 }
 
 /**
